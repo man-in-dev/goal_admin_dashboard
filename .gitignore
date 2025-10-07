@@ -1,3 +1,9 @@
 node_modules
 .next
 .env
+dist
+.next
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

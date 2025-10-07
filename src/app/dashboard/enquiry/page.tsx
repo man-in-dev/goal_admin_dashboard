@@ -20,10 +20,12 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Download
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formApi, EnquiryForm as ApiEnquiryForm } from '@/lib/api';
+import { handleCSVDownload, generateFilename } from '@/lib/csv-utils';
 
 interface EnquiryForm {
   _id: string;
@@ -168,6 +170,42 @@ export default function EnquiryFormsPage() {
     }
   };
 
+  const handleDownloadCSV = async () => {
+    try {
+      const params: any = {};
+      if (statusFilter !== 'all') {
+        params.status = statusFilter;
+      }
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      await handleCSVDownload(
+        () => formApi.downloadEnquiriesCSV(params),
+        generateFilename('enquiries'),
+        (error) => {
+          toast({
+            title: "Download Error",
+            description: "Failed to download CSV file. Please try again.",
+            variant: "destructive",
+          });
+        }
+      );
+
+      toast({
+        title: "Download Started",
+        description: "CSV file download has started.",
+      });
+    } catch (error) {
+      console.error('Error downloading CSV:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download CSV file",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -187,6 +225,10 @@ export default function EnquiryFormsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Enquiry Forms</h1>
           <p className="text-gray-600">Manage student enquiries and course inquiries</p>
         </div>
+        <Button onClick={handleDownloadCSV} className="flex items-center gap-2">
+          <Download className="h-4 w-4" />
+          Download CSV
+        </Button>
       </div>
 
       {/* Stats Cards */}

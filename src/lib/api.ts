@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000/api'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -193,6 +193,17 @@ export const formApi = {
     return response.data
   },
 
+  downloadEnquiriesCSV: async (params?: {
+    status?: string
+    search?: string
+  }) => {
+    const response = await api.get('/enquiry/download-csv', { 
+      params,
+      responseType: 'blob'
+    })
+    return response.data
+  },
+
   // Complaint & Feedback Forms
   getComplaintFeedbackForms: async (params?: {
     page?: number
@@ -222,6 +233,18 @@ export const formApi = {
 
   getComplaintFeedbackStats: async () => {
     const response = await api.get('/complaint-feedback/stats')
+    return response.data
+  },
+
+  downloadComplaintsFeedbackCSV: async (params?: {
+    status?: string
+    type?: string
+    search?: string
+  }) => {
+    const response = await api.get('/complaint-feedback/download-csv', { 
+      params,
+      responseType: 'blob'
+    })
     return response.data
   },
 }

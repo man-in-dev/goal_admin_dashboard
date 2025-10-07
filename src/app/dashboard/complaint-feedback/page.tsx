@@ -27,10 +27,12 @@ import {
   Building,
   Wrench,
   GraduationCap,
-  MoreHorizontal
+  MoreHorizontal,
+  Download
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { formApi, ComplaintFeedback as ApiComplaintFeedback } from '@/lib/api';
+import { handleCSVDownload, generateFilename } from '@/lib/csv-utils';
 
 interface ComplaintFeedback {
   _id: string;
@@ -240,6 +242,45 @@ export default function ComplaintFeedbackPage() {
     }
   };
 
+  const handleDownloadCSV = async () => {
+    try {
+      const params: any = {};
+      if (statusFilter !== 'all') {
+        params.status = statusFilter;
+      }
+      if (typeFilter !== 'all') {
+        params.type = typeFilter;
+      }
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      await handleCSVDownload(
+        () => formApi.downloadComplaintsFeedbackCSV(params),
+        generateFilename('complaints_feedback'),
+        (error) => {
+          toast({
+            title: "Download Error",
+            description: "Failed to download CSV file. Please try again.",
+            variant: "destructive",
+          });
+        }
+      );
+
+      toast({
+        title: "Download Started",
+        description: "CSV file download has started.",
+      });
+    } catch (error) {
+      console.error('Error downloading CSV:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download CSV file",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   if (loading) {
     return (
@@ -260,6 +301,10 @@ export default function ComplaintFeedbackPage() {
           <h1 className="text-3xl font-bold text-gray-900">Complaints & Feedback</h1>
           <p className="text-gray-600">Manage complaints, feedback, and suggestions</p>
         </div>
+        <Button onClick={handleDownloadCSV} className="flex items-center gap-2">
+          <Download className="h-4 w-4" />
+          Download CSV
+        </Button>
       </div>
 
       {/* Stats Cards */}
