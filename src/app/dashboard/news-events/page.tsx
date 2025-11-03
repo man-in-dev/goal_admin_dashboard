@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { QuillEditor } from '@/components/ui/quill-editor';
 import { 
   Search, 
   Eye, 
@@ -570,12 +570,11 @@ export default function NewsEventsPage() {
               
               <div>
                 <Label htmlFor="content">Content *</Label>
-                <Textarea
-                  id="content"
+                <QuillEditor
                   value={formData.content}
-                  onChange={(e) => handleInputChange('content', e.target.value)}
+                  onChange={(value) => handleInputChange('content', value)}
                   placeholder="Full content"
-                  rows={6}
+                  className="min-h-[200px]"
                 />
               </div>
               
@@ -689,12 +688,11 @@ export default function NewsEventsPage() {
             
             <div>
               <Label htmlFor="edit-content">Content *</Label>
-              <Textarea
-                id="edit-content"
+              <QuillEditor
                 value={formData.content}
-                onChange={(e) => handleInputChange('content', e.target.value)}
+                onChange={(value) => handleInputChange('content', value)}
                 placeholder="Full content"
-                rows={6}
+                className="min-h-[200px]"
               />
             </div>
             
@@ -877,9 +875,10 @@ export default function NewsEventsPage() {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-gray-900">Content</h3>
                 <div className="prose prose-gray max-w-none">
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {viewingItem.content}
-                  </div>
+                  <div 
+                    className="text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: viewingItem.content }}
+                  />
                 </div>
               </div>
 
