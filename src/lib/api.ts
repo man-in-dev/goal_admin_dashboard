@@ -811,3 +811,30 @@ export const resultApi = {
     return response.data
   }
 }
+
+export interface GVETAnswerKey {
+  _id: string
+  name: string
+  rollNo: string
+  phone: string
+  questionNo: string
+  explanation: string
+  createdAt: string
+  updatedAt: string
+}
+
+export const gvetAdminApi = {
+  getAnswerKeys: async (params?: {
+    page?: number
+    limit?: number
+    search?: string
+  }) => {
+    const response = await api.get('/gvet/answer-key', { params })
+    return response.data
+  },
+
+  deleteAnswerKey: async (id: string) => {
+    const response = await api.delete(`/gvet/answer-key/${id}`)
+    return response.data
+  },
+}

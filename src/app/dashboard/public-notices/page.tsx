@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { QuillEditor } from "@/components/ui/quill-editor";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +49,13 @@ import {
 import { publicNoticeApi, PublicNotice } from "@/lib/api";
 
 export default function PublicNoticesPage() {
+  const stripHtml = (html: string) => {
+    if (!html) return '';
+    const tmp = typeof window !== 'undefined' ? document.createElement('div') : null;
+    if (!tmp) return html;
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
   const [notices, setNotices] = useState<PublicNotice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -303,12 +311,11 @@ export default function PublicNoticesPage() {
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
+                <QuillEditor
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
-                  required
+                  onChange={(value) => setFormData({ ...formData, description: value })}
+                  placeholder="Write the notice description..."
+                  className="min-h-[200px]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -491,7 +498,7 @@ export default function PublicNoticesPage() {
                       <div>
                         <div className="font-medium">{notice.title}</div>
                         <div className="text-sm text-gray-500 truncate max-w-[300px]">
-                          {notice.description}
+                          {stripHtml(notice.description)}
                         </div>
                       </div>
                     </TableCell>
@@ -579,12 +586,11 @@ export default function PublicNoticesPage() {
             </div>
             <div>
               <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
+              <QuillEditor
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-                required
+                onChange={(value) => setFormData({ ...formData, description: value })}
+                placeholder="Write the notice description..."
+                className="min-h-[200px]"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -692,7 +698,10 @@ export default function PublicNoticesPage() {
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium text-gray-700">Description</Label>
-                <p className="text-gray-900 mt-1">{selectedNotice.description}</p>
+                <div
+                  className="prose prose-sm max-w-none mt-1 text-gray-900"
+                  dangerouslySetInnerHTML={{ __html: selectedNotice.description }}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

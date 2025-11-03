@@ -33,6 +33,13 @@ import {
 import { newsEventApi, NewsEvent } from '@/lib/api';
 
 export default function NewsEventsPage() {
+  const stripHtml = (html: string) => {
+    if (!html) return '';
+    const tmp = typeof window !== 'undefined' ? document.createElement('div') : null;
+    if (!tmp) return html;
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
   const [newsEvents, setNewsEvents] = useState<NewsEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +53,7 @@ export default function NewsEventsPage() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    type: 'announcement' as 'announcement' | 'news' | 'event',
+    type: 'news' as 'news' | 'event',
     publishDate: '',
     publishTime: '',
     location: '',
@@ -271,7 +278,7 @@ export default function NewsEventsPage() {
     setFormData({
       title: '',
       content: '',
-      type: 'announcement',
+      type: 'news',
       publishDate: '',
       publishTime: '',
       location: '',
@@ -285,7 +292,7 @@ export default function NewsEventsPage() {
     setFormData({
       title: item.title,
       content: item.content,
-      type: item.type,
+      type: (item.type === 'announcement' ? 'news' : item.type) as 'news' | 'event',
       publishDate: item.publishDate ? new Date(item.publishDate).toISOString().split('T')[0] : '',
       publishTime: item.publishTime || '',
       location: item.location || '',
@@ -352,17 +359,6 @@ export default function NewsEventsPage() {
             <div className="text-2xl font-bold">{newsEvents.length}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Announcements</CardTitle>
-            <Newspaper className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {newsEvents.filter(item => item.type === 'announcement').length}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filters */}
@@ -389,7 +385,6 @@ export default function NewsEventsPage() {
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="news">News</SelectItem>
                 <SelectItem value="event">Event</SelectItem>
-                <SelectItem value="announcement">Announcement</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -427,7 +422,10 @@ export default function NewsEventsPage() {
                           {item.title}
                         </div>
                         <div className="text-sm text-gray-500 line-clamp-2">
-                          {item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '')}
+                          {(() => {
+                            const text = stripHtml(item.content);
+                            return text.length > 100 ? text.substring(0, 100) + '...' : text;
+                          })()}
                         </div>
                       </div>
                     </TableCell>
@@ -587,7 +585,6 @@ export default function NewsEventsPage() {
                   <SelectContent>
                     <SelectItem value="news">News</SelectItem>
                     <SelectItem value="event">Event</SelectItem>
-                    <SelectItem value="announcement">Announcement</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -705,7 +702,6 @@ export default function NewsEventsPage() {
                 <SelectContent>
                   <SelectItem value="news">News</SelectItem>
                   <SelectItem value="event">Event</SelectItem>
-                  <SelectItem value="announcement">Announcement</SelectItem>
                 </SelectContent>
               </Select>
             </div>

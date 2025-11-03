@@ -29,6 +29,7 @@ const navigation = [
   { name: "Banner Management", href: "/dashboard/banners", icon: Upload },
   { name: "News & Events", href: "/dashboard/news-events", icon: Newspaper },
   { name: "Public Notices", href: "/dashboard/public-notices", icon: FileText },
+  { name: "GVET Answer Keys", href: "/dashboard/gvet-answer-keys", icon: FileText },
   { name: "Blogs", href: "/dashboard/blogs", icon: BookOpen },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
