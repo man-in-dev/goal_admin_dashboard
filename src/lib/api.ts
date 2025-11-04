@@ -730,8 +730,15 @@ export interface Result {
   batch: string;
   branch: string;
   uploadedBy: string;
-  createdAt: string;
+  createdAt?: string;
   updatedAt: string;
+  
+  // New optional fields for filtering
+  testType?: 'CLASSROOM_TEST' | 'SURPRISE_TEST' | 'MOCK_TEST' | 'FINAL_TEST';
+  examId?: string;
+  batchYear?: number;
+  batchCode?: string;
+  totalStudents?: number;
 }
 
 export const resultApi = {
@@ -745,6 +752,9 @@ export const resultApi = {
     search?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    testType?: string;
+    batchYear?: number;
+    batchCode?: string;
   }) => {
     const response = await api.get('/result', { params })
     return response.data

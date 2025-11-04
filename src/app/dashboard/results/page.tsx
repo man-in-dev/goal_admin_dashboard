@@ -27,6 +27,8 @@ export default function ResultsPage() {
     batch: 'all',
     branch: '',
     testDate: '',
+    testType: 'all',
+    batchYear: '',
     sortBy: 'testDate',
     sortOrder: 'desc' as 'asc' | 'desc'
   });
@@ -52,7 +54,9 @@ export default function ResultsPage() {
         limit: pagination.limit,
         ...filters,
         course: filters.course === 'all' ? '' : filters.course,
-        batch: filters.batch === 'all' ? '' : filters.batch
+        batch: filters.batch === 'all' ? '' : filters.batch,
+        testType: filters.testType === 'all' ? '' : filters.testType,
+        batchYear: filters.batchYear ? parseInt(filters.batchYear) : undefined
       });
 
       if (response.success) {
@@ -242,8 +246,14 @@ export default function ResultsPage() {
             <DialogHeader>
               <DialogTitle>Upload Results CSV</DialogTitle>
               <DialogDescription>
-                Upload a CSV file containing student results. The file should have the following columns:
-                COURSE, TEST DATE, RANK, ROLL NO, STUDENT NAME, TQ, TA, TR, TW, TL, PR, PW, CR, CW, BR, BW, Total MARKS, MARKS%, W%, PERCENTILE, BATCH, BRANCH
+                Upload a CSV file containing student results. Required columns:
+                <br />
+                <strong>COURSE, TEST DATE, RANK, ROLL NO, STUDENT NAME, TQ, TA, TR, TW, TL, PR, PW, CR, CW, BR, BW, Total MARKS, MARKS%, W%, PERCENTILE, BATCH, BRANCH</strong>
+                <br />
+                <br />
+                Optional columns (will be auto-generated if not provided):
+                <br />
+                <strong>TEST TYPE, EXAM ID, BATCH YEAR, BATCH CODE, TOTAL STUDENTS</strong>
                 <br />
                 <a 
                   href="/sample-results.csv" 
@@ -346,7 +356,7 @@ export default function ResultsPage() {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             <div>
               <Label htmlFor="search">Search</Label>
               <div className="relative">
@@ -359,6 +369,21 @@ export default function ResultsPage() {
                   className="pl-8"
                 />
               </div>
+            </div>
+            <div>
+              <Label htmlFor="testType">Test Type</Label>
+              <Select value={filters.testType} onValueChange={(value) => setFilters(prev => ({ ...prev, testType: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All types</SelectItem>
+                  <SelectItem value="CLASSROOM_TEST">Classroom Test</SelectItem>
+                  <SelectItem value="SURPRISE_TEST">Surprise Test</SelectItem>
+                  <SelectItem value="MOCK_TEST">Mock Test</SelectItem>
+                  <SelectItem value="FINAL_TEST">Final Test</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="course">Course</Label>
@@ -389,6 +414,16 @@ export default function ResultsPage() {
               </Select>
             </div>
             <div>
+              <Label htmlFor="batchYear">Batch Year</Label>
+              <Input
+                id="batchYear"
+                type="number"
+                placeholder="e.g., 2025"
+                value={filters.batchYear}
+                onChange={(e) => setFilters(prev => ({ ...prev, batchYear: e.target.value }))}
+              />
+            </div>
+            <div>
               <Label htmlFor="sortBy">Sort By</Label>
               <Select value={filters.sortBy} onValueChange={(value) => setFilters(prev => ({ ...prev, sortBy: value }))}>
                 <SelectTrigger>
@@ -403,18 +438,6 @@ export default function ResultsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="sortOrder">Order</Label>
-              <Select value={filters.sortOrder} onValueChange={(value: 'asc' | 'desc') => setFilters(prev => ({ ...prev, sortOrder: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="asc">Ascending</SelectItem>
-                  <SelectItem value="desc">Descending</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div className="flex items-end">
               <Button variant="outline" onClick={() => setFilters({
                 search: '',
@@ -422,6 +445,8 @@ export default function ResultsPage() {
                 batch: 'all',
                 branch: '',
                 testDate: '',
+                testType: 'all',
+                batchYear: '',
                 sortBy: 'testDate',
                 sortOrder: 'desc'
               })}>
@@ -483,6 +508,7 @@ export default function ResultsPage() {
                     <TableHead>Student</TableHead>
                     <TableHead>Roll No</TableHead>
                     <TableHead>Course</TableHead>
+                    <TableHead>Test Type</TableHead>
                     <TableHead>Test Date</TableHead>
                     <TableHead>Total Marks</TableHead>
                     <TableHead>Percentage</TableHead>
@@ -509,6 +535,15 @@ export default function ResultsPage() {
                       <TableCell>{result.rollNo}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{result.course}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {result.testType ? (
+                          <Badge variant={result.testType === 'SURPRISE_TEST' ? 'destructive' : 'default'}>
+                            {result.testType.replace('_', ' ')}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
                       </TableCell>
                       <TableCell>{formatDate(result.testDate)}</TableCell>
                       <TableCell>{result.totalMarks}</TableCell>
@@ -615,9 +650,39 @@ export default function ResultsPage() {
                   <p className="text-lg font-semibold">{selectedResult.branch}</p>
                 </div>
                 <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Test Type</Label>
+                  <p className="text-lg font-semibold">
+                    {selectedResult.testType ? (
+                      <Badge variant={selectedResult.testType === 'SURPRISE_TEST' ? 'destructive' : 'default'}>
+                        {selectedResult.testType.replace('_', ' ')}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">Not specified</span>
+                    )}
+                  </p>
+                </div>
+                <div>
                   <Label className="text-sm font-medium text-muted-foreground">Uploaded By</Label>
                   <p className="text-lg font-semibold">{selectedResult.uploadedBy}</p>
                 </div>
+                {selectedResult.examId && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Exam ID</Label>
+                    <p className="text-lg font-semibold font-mono text-xs">{selectedResult.examId}</p>
+                  </div>
+                )}
+                {selectedResult.batchYear && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Batch Year</Label>
+                    <p className="text-lg font-semibold">{selectedResult.batchYear}</p>
+                  </div>
+                )}
+                {selectedResult.totalStudents && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Total Students</Label>
+                    <p className="text-lg font-semibold">Ranked {selectedResult.rank} out of {selectedResult.totalStudents}</p>
+                  </div>
+                )}
               </div>
 
               {/* Performance Metrics */}
@@ -765,6 +830,25 @@ export default function ResultsPage() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="edit-testType">Test Type</Label>
+                  <Select
+                    value={editForm.testType || 'CLASSROOM_TEST'}
+                    onValueChange={(value: 'CLASSROOM_TEST' | 'SURPRISE_TEST' | 'MOCK_TEST' | 'FINAL_TEST') =>
+                      setEditForm(prev => ({ ...prev, testType: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CLASSROOM_TEST">Classroom Test</SelectItem>
+                      <SelectItem value="SURPRISE_TEST">Surprise Test</SelectItem>
+                      <SelectItem value="MOCK_TEST">Mock Test</SelectItem>
+                      <SelectItem value="FINAL_TEST">Final Test</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
                   <Label htmlFor="edit-batch">Batch</Label>
                   <Input
                     id="edit-batch"
@@ -773,11 +857,46 @@ export default function ResultsPage() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="edit-batchYear">Batch Year</Label>
+                  <Input
+                    id="edit-batchYear"
+                    type="number"
+                    value={editForm.batchYear || ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, batchYear: e.target.value ? parseInt(e.target.value) : undefined }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-batchCode">Batch Code</Label>
+                  <Input
+                    id="edit-batchCode"
+                    value={editForm.batchCode || ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, batchCode: e.target.value }))}
+                  />
+                </div>
+                <div>
                   <Label htmlFor="edit-branch">Branch</Label>
                   <Input
                     id="edit-branch"
                     value={editForm.branch || ''}
                     onChange={(e) => setEditForm(prev => ({ ...prev, branch: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-examId">Exam ID</Label>
+                  <Input
+                    id="edit-examId"
+                    value={editForm.examId || ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, examId: e.target.value }))}
+                    placeholder="Auto-generated if empty"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-totalStudents">Total Students</Label>
+                  <Input
+                    id="edit-totalStudents"
+                    type="number"
+                    value={editForm.totalStudents || ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, totalStudents: e.target.value ? parseInt(e.target.value) : undefined }))}
                   />
                 </div>
                 <div>
