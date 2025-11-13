@@ -131,14 +131,6 @@ export default function LoginPage() {
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
-
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h3>
-              <p className="text-xs text-blue-700">
-                Email: admin@goalinstitute.com<br />
-                Password: admin123
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
