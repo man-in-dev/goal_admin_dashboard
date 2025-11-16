@@ -848,3 +848,95 @@ export const gvetAdminApi = {
     return response.data
   },
 }
+
+// GAET Results API
+export interface GAETResult {
+  _id?: string;
+  rollNo: string;
+  studentName: string;
+  testName: string;
+  tq: number;
+  tr: number;
+  tw: number;
+  tl: number;
+  pr: number;
+  pw: number;
+  cr: number;
+  cw: number;
+  mr: number;
+  mw: number;
+  br: number;
+  bw: number;
+  gkr: number;
+  gkw: number;
+  totalMarks: number;
+  marksPercentage: number;
+  scholarship?: string;
+  specialDiscount?: string;
+  totalFeeOneTime?: number;
+  scholarshipAmount?: number;
+  totalFeeInstallment?: number;
+  scholarshipAmountInstallment?: number;
+  testDate: string;
+  testCenter?: string;
+  remarks?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const gaetResultsApi = {
+  getGAETResults: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    testName?: string;
+    testCenter?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => {
+    const response = await api.get('/gaet-results', { params })
+    return response.data
+  },
+
+  getGAETResultById: async (id: string) => {
+    const response = await api.get(`/gaet-results/${id}`)
+    return response.data
+  },
+
+  createGAETResult: async (data: Partial<GAETResult>) => {
+    const response = await api.post('/gaet-results', data)
+    return response.data
+  },
+
+  updateGAETResult: async (id: string, data: Partial<GAETResult>) => {
+    const response = await api.put(`/gaet-results/${id}`, data)
+    return response.data
+  },
+
+  deleteGAETResult: async (id: string) => {
+    const response = await api.delete(`/gaet-results/${id}`)
+    return response.data
+  },
+
+  deleteMultipleGAETResults: async (ids: string[]) => {
+    const response = await api.delete('/gaet-results/multiple', { data: { ids } })
+    return response.data
+  },
+
+  uploadCSVGAETResults: async (file: File) => {
+    const formData = new FormData()
+    formData.append('csvFile', file)
+    
+    const response = await api.post('/gaet-results/upload-csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  },
+
+  getGAETResultStats: async () => {
+    const response = await api.get('/gaet-results/stats')
+    return response.data
+  },
+}

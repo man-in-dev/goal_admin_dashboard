@@ -17,6 +17,7 @@ import {
   Upload,
   FileText,
   Trophy,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Enquiry Forms", href: "/dashboard/enquiry", icon: HelpCircle },
   { name: "Complaints & Feedback", href: "/dashboard/complaint-feedback", icon: AlertTriangle },
   { name: "Results", href: "/dashboard/results", icon: Trophy },
+  { name: "GAET Results", href: "/dashboard/gaet-results", icon: GraduationCap },
   { name: "Banner Management", href: "/dashboard/banners", icon: Upload },
   { name: "News & Events", href: "/dashboard/news-events", icon: Newspaper },
   { name: "Public Notices", href: "/dashboard/public-notices", icon: FileText },
