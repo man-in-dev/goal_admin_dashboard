@@ -940,3 +940,137 @@ export const gaetResultsApi = {
     return response.data
   },
 }
+
+// GAET Date API
+export interface GAETDate {
+  _id: string;
+  date: string;
+  mode: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const gaetDateApi = {
+  getGAETDates: async (params?: {
+    isActive?: boolean;
+  }) => {
+    const response = await api.get('/gaet-dates', { params })
+    return response.data
+  },
+
+  getGAETDateById: async (id: string) => {
+    const response = await api.get(`/gaet-dates/${id}`)
+    return response.data
+  },
+
+  createGAETDate: async (data: Partial<GAETDate>) => {
+    const response = await api.post('/gaet-dates', data)
+    return response.data
+  },
+
+  updateGAETDate: async (id: string, data: Partial<GAETDate>) => {
+    const response = await api.put(`/gaet-dates/${id}`, data)
+    return response.data
+  },
+
+  deleteGAETDate: async (id: string) => {
+    const response = await api.delete(`/gaet-dates/${id}`)
+    return response.data
+  },
+}
+
+// AITS Video Solution API
+export interface AITSVideoSolution {
+  _id: string;
+  testName: string;
+  subject: string;
+  videoLink?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const aitsVideoSolutionApi = {
+  getAITSVideoSolutions: async (params?: {
+    activeOnly?: boolean;
+  }) => {
+    const response = await api.get('/aits-video-solutions', { params })
+    return response.data
+  },
+
+  getAITSVideoSolutionById: async (id: string) => {
+    const response = await api.get(`/aits-video-solutions/${id}`)
+    return response.data
+  },
+
+  createAITSVideoSolution: async (data: Partial<AITSVideoSolution>) => {
+    const response = await api.post('/aits-video-solutions', data)
+    return response.data
+  },
+
+  updateAITSVideoSolution: async (id: string, data: Partial<AITSVideoSolution>) => {
+    const response = await api.put(`/aits-video-solutions/${id}`, data)
+    return response.data
+  },
+
+  deleteAITSVideoSolution: async (id: string) => {
+    const response = await api.delete(`/aits-video-solutions/${id}`)
+    return response.data
+  },
+
+  bulkDeleteAITSVideoSolutions: async (ids: string[]) => {
+    const response = await api.delete('/aits-video-solutions', { data: { ids } })
+    return response.data
+  },
+}
+
+// Course API
+export interface Course {
+  _id: string;
+  title: string;
+  description: string;
+  category: 'Medical Courses' | 'Engineering Courses' | 'Pre-Foundation Course';
+  icon?: string;
+  order: number;
+  isActive: boolean;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const courseApi = {
+  getCourses: async (params?: {
+    category?: string;
+    isActive?: boolean;
+  }) => {
+    const response = await api.get('/courses', { params });
+    return response.data;
+  },
+
+  getCourseById: async (id: string) => {
+    const response = await api.get(`/courses/${id}`);
+    return response.data;
+  },
+
+  getCourseBySlug: async (slug: string) => {
+    const response = await api.get(`/courses/slug/${slug}`);
+    return response.data;
+  },
+
+  createCourse: async (data: Partial<Course>) => {
+    const response = await api.post('/courses', data);
+    return response.data;
+  },
+
+  updateCourse: async (id: string, data: Partial<Course>) => {
+    const response = await api.put(`/courses/${id}`, data);
+    return response.data;
+  },
+
+  deleteCourse: async (id: string) => {
+    const response = await api.delete(`/courses/${id}`);
+    return response.data;
+  },
+}

@@ -181,7 +181,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Public Notices</CardTitle>
+            <CardTitle className="text-sm font-medium">Announcements</CardTitle>
             <Bell className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
@@ -280,7 +280,7 @@ export default function DashboardPage() {
             <Button asChild variant="outline" className="h-20 flex-col">
               <Link href="/dashboard/public-notices">
                 <Bell className="h-6 w-6 mb-2" />
-                Public Notices
+                Announcements
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-20 flex-col">

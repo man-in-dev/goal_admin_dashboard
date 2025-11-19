@@ -107,7 +107,7 @@ export default function PublicNoticesPage() {
       console.error("Error fetching notices:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch public notices",
+        description: "Failed to fetch announcements",
         variant: "destructive",
       });
     } finally {
@@ -158,7 +158,7 @@ export default function PublicNoticesPage() {
         await publicNoticeApi.updatePublicNotice(selectedNotice._id, formData);
         toast({
           title: "Success",
-          description: "Public notice updated successfully",
+          description: "Announcement updated successfully",
         });
         setIsEditDialogOpen(false);
       } else {
@@ -166,7 +166,7 @@ export default function PublicNoticesPage() {
         await publicNoticeApi.createPublicNotice(formData);
         toast({
           title: "Success",
-          description: "Public notice created successfully",
+          description: "Announcement created successfully",
         });
         setIsCreateDialogOpen(false);
       }
@@ -177,7 +177,7 @@ export default function PublicNoticesPage() {
       console.error("Error saving notice:", error);
       toast({
         title: "Error",
-        description: "Failed to save public notice",
+        description: "Failed to save announcement",
         variant: "destructive",
       });
     } finally {
@@ -187,20 +187,20 @@ export default function PublicNoticesPage() {
 
   // Handle delete
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this notice?")) return;
+    if (!confirm("Are you sure you want to delete this announcement?")) return;
 
     try {
       await publicNoticeApi.deletePublicNotice(id);
       toast({
         title: "Success",
-        description: "Public notice deleted successfully",
+        description: "Announcement deleted successfully",
       });
       fetchNotices();
     } catch (error) {
       console.error("Error deleting notice:", error);
       toast({
         title: "Error",
-        description: "Failed to delete public notice",
+        description: "Failed to delete announcement",
         variant: "destructive",
       });
     }
@@ -280,23 +280,23 @@ export default function PublicNoticesPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Public Notices</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Announcements</h1>
           <p className="text-gray-600 mt-1">
-            Manage public notices and announcements
+            Manage announcements
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={resetForm}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Notice
+              Add Announcement
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Create Public Notice</DialogTitle>
+              <DialogTitle>Create Announcement</DialogTitle>
               <DialogDescription>
-                Add a new public notice or announcement
+                Add a new announcement
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -314,7 +314,7 @@ export default function PublicNoticesPage() {
                 <QuillEditor
                   value={formData.description}
                   onChange={(value) => setFormData({ ...formData, description: value })}
-                  placeholder="Write the notice description..."
+                  placeholder="Write the announcement description..."
                   className="min-h-[200px]"
                 />
               </div>
@@ -403,7 +403,7 @@ export default function PublicNoticesPage() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Creating..." : "Create Notice"}
+                  {isSubmitting ? "Creating..." : "Create Announcement"}
                 </Button>
               </DialogFooter>
             </form>
@@ -419,7 +419,7 @@ export default function PublicNoticesPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Search notices..."
+                  placeholder="Search announcements..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -471,7 +471,7 @@ export default function PublicNoticesPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Public Notices ({filteredNotices.length})
+            Announcements ({filteredNotices.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -569,9 +569,9 @@ export default function PublicNoticesPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Public Notice</DialogTitle>
+            <DialogTitle>Edit Announcement</DialogTitle>
             <DialogDescription>
-              Update the public notice details
+              Update the announcement details
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -678,7 +678,7 @@ export default function PublicNoticesPage() {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Updating..." : "Update Notice"}
+                  {isSubmitting ? "Updating..." : "Update Announcement"}
               </Button>
             </DialogFooter>
           </form>
@@ -691,7 +691,7 @@ export default function PublicNoticesPage() {
           <DialogHeader>
             <DialogTitle>{selectedNotice?.title}</DialogTitle>
             <DialogDescription>
-              Public notice details
+              Announcement details
             </DialogDescription>
           </DialogHeader>
           {selectedNotice && (

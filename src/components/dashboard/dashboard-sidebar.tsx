@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -18,28 +18,137 @@ import {
   FileText,
   Trophy,
   GraduationCap,
+  Video,
+  ChevronDown,
+  ChevronRight,
+  Users,
+  Home,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/auth-provider";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { 
+    name: "Home", 
+    href: "#", 
+    icon: Home,
+    children: [
+      { name: "News & Events", href: "/dashboard/news-events", icon: Newspaper },
+      { name: "Announcements", href: "/dashboard/public-notices", icon: FileText },
+    ]
+  },
+  { 
+    name: "Content Management", 
+    href: "#", 
+    icon: Upload,
+    children: [
+      { name: "Banner Management", href: "/dashboard/banners", icon: Upload },
+      { name: "Blogs", href: "/dashboard/blogs", icon: BookOpen },
+    ]
+  },
+  { 
+    name: "Courses", 
+    href: "#", 
+    icon: BookOpen,
+    children: [
+      { name: "Medical Courses", href: "/dashboard/courses?category=Medical Courses", icon: BookOpen },
+      { name: "Engineering Courses", href: "/dashboard/courses?category=Engineering Courses", icon: BookOpen },
+    ]
+  },
+  { 
+    name: "Student Zone", 
+    href: "#", 
+    icon: Users,
+    children: [
+      { name: "Complaints & Feedback", href: "/dashboard/complaint-feedback", icon: AlertTriangle },
+      { name: "AITS Video Solutions", href: "/dashboard/aits-video-solutions", icon: Video },
+      { name: "GVET Answer Keys", href: "/dashboard/gvet-answer-keys", icon: FileText },
+    ]
+  },
+  { 
+    name: "Results", 
+    href: "#", 
+    icon: Trophy,
+    children: [
+      { name: "GAET Results", href: "/dashboard/gaet-results", icon: GraduationCap },
+      { name: "Upcoming GAET Dates", href: "/dashboard/gaet-dates", icon: Calendar },
+    ]
+  },
   { name: "Enquiry Forms", href: "/dashboard/enquiry", icon: HelpCircle },
-  { name: "Complaints & Feedback", href: "/dashboard/complaint-feedback", icon: AlertTriangle },
-  { name: "Results", href: "/dashboard/results", icon: Trophy },
-  { name: "GAET Results", href: "/dashboard/gaet-results", icon: GraduationCap },
-  { name: "Banner Management", href: "/dashboard/banners", icon: Upload },
-  { name: "News & Events", href: "/dashboard/news-events", icon: Newspaper },
-  { name: "Public Notices", href: "/dashboard/public-notices", icon: FileText },
-  { name: "GVET Answer Keys", href: "/dashboard/gvet-answer-keys", icon: FileText },
-  { name: "Blogs", href: "/dashboard/blogs", icon: BookOpen },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 export function DashboardSidebar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const pathname = usePathname();
   const { user, logout } = useAuth();
+
+  const toggleMenu = (menuName: string) => {
+    setExpandedMenus((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(menuName)) {
+        newSet.delete(menuName);
+      } else {
+        newSet.add(menuName);
+      }
+      return newSet;
+    });
+  };
+
+  const isMenuActive = (item: any) => {
+    if (item.href && pathname === item.href && item.href !== "#") return true;
+    if (item.children) {
+      return item.children.some((child: any) => {
+        if (pathname === child.href) return true;
+        if (child.children) {
+          return child.children.some((grandchild: any) => {
+            if (pathname === grandchild.href) return true;
+            // Handle query parameters
+            if (grandchild.href.includes("?") && pathname.startsWith(grandchild.href.split("?")[0])) {
+              return true;
+            }
+            return false;
+          });
+        }
+        return false;
+      });
+    }
+    return false;
+  };
+
+  // Auto-expand menu if current pathname matches a child route
+  useEffect(() => {
+    navigation.forEach((item) => {
+      if (item.children) {
+        const hasActiveChild = item.children.some((child: any) => {
+          if (pathname === child.href) return true;
+          if (child.children) {
+            return child.children.some((grandchild: any) => pathname === grandchild.href);
+          }
+          return false;
+        });
+        if (hasActiveChild) {
+          setExpandedMenus((prev) => {
+            const newSet = new Set(prev);
+            newSet.add(item.name);
+            // Also expand the parent if it has nested children
+            item.children.forEach((child: any) => {
+              if (child.children) {
+                const hasActiveGrandchild = child.children.some((grandchild: any) => pathname === grandchild.href);
+                if (hasActiveGrandchild) {
+                  newSet.add(child.name);
+                }
+              }
+            });
+            return newSet;
+          });
+        }
+      }
+    });
+  }, [pathname]);
 
   return (
     <>
@@ -82,10 +191,140 @@ export function DashboardSidebar() {
           {/* Navigation */}
           <nav className="flex-1 px-4 py-3 space-y-2 overflow-y-auto overflow-x-hidden sidebar-nav">
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = isMenuActive(item);
+              const isExpanded = expandedMenus.has(item.name);
+              const hasChildren = item.children && item.children.length > 0;
+
               return (
+                <div key={item.name}>
+                  {hasChildren ? (
+                    <>
+                      <div className="flex items-center">
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex-1 flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+                            isActive
+                              ? "bg-blue-100 text-blue-700"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          )}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                          <span className="truncate">{item.name}</span>
+                        </Link>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleMenu(item.name);
+                          }}
+                          className={cn(
+                            "flex items-center justify-center w-6 h-8 text-sm font-medium rounded-md transition-colors",
+                            isActive
+                              ? "text-blue-700 hover:bg-blue-200"
+                              : "text-gray-600 hover:bg-gray-100"
+                          )}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                          )}
+                        </button>
+                      </div>
+                      {isExpanded && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {item.children.map((child: any) => {
+                            const isChildActive = isMenuActive(child);
+                            const hasGrandchildren = child.children && child.children.length > 0;
+                            const isChildExpanded = expandedMenus.has(child.name);
+
+                            if (hasGrandchildren) {
+                              return (
+                                <div key={child.name}>
+                                  <div className="flex items-center">
+                                    <Link
+                                      href={child.href}
+                                      className={cn(
+                                        "flex-1 flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+                                        isChildActive
+                                          ? "bg-blue-100 text-blue-700"
+                                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                      )}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                      <child.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                                      <span className="truncate">{child.name}</span>
+                                    </Link>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        toggleMenu(child.name);
+                                      }}
+                                      className={cn(
+                                        "flex items-center justify-center w-6 h-8 text-sm font-medium rounded-md transition-colors",
+                                        isChildActive
+                                          ? "text-blue-700 hover:bg-blue-200"
+                                          : "text-gray-600 hover:bg-gray-100"
+                                      )}
+                                    >
+                                      {isChildExpanded ? (
+                                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                                      ) : (
+                                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                                      )}
+                                    </button>
+                                  </div>
+                                  {isChildExpanded && (
+                                    <div className="ml-4 mt-1 space-y-1">
+                                      {child.children.map((grandchild: any) => {
+                                        const isGrandchildActive = pathname === grandchild.href || 
+                                          (grandchild.href.includes("?") && pathname.startsWith(grandchild.href.split("?")[0]));
+                                        return (
+                                          <Link
+                                            key={grandchild.name}
+                                            href={grandchild.href}
+                                            className={cn(
+                                              "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+                                              isGrandchildActive
+                                                ? "bg-blue-100 text-blue-700"
+                                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                            )}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                          >
+                                            <grandchild.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                                            <span className="truncate">{grandchild.name}</span>
+                                          </Link>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <Link
+                                  key={child.name}
+                                  href={child.href}
+                                  className={cn(
+                                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+                                    isChildActive
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                  )}
+                                  onClick={() => setMobileMenuOpen(false)}
+                                >
+                                  <child.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                                  <span className="truncate">{child.name}</span>
+                                </Link>
+                              );
+                            }
+                          })}
+                        </div>
+                      )}
+                    </>
+                  ) : (
                 <Link
-                  key={item.name}
                   href={item.href}
                   className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
@@ -98,6 +337,8 @@ export function DashboardSidebar() {
                   <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
                   <span className="truncate">{item.name}</span>
                 </Link>
+                  )}
+                </div>
               );
             })}
           </nav>
