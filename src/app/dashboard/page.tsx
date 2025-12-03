@@ -15,10 +15,12 @@ import {
   Newspaper,
   BookOpen,
   Bell,
-  RefreshCw
+  RefreshCw,
+  GraduationCap
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { dashboardApi } from '@/lib/api'
+import { useAuth } from '@/components/providers/auth-provider'
 
 interface DashboardStats {
   enquiryForms: number
@@ -38,6 +40,7 @@ interface RecentActivity {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
     enquiryForms: 0,
     complaintsFeedback: 0,
@@ -139,72 +142,102 @@ export default function DashboardPage() {
       </div>
 
       {/* Content Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Enquiry Forms</CardTitle>
-            <HelpCircle className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.enquiryForms || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Student enquiries
-            </p>
-          </CardContent>
-        </Card>
+      {user?.role === 'event_publisher' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">News & Events</CardTitle>
+              <Newspaper className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.newsEvents || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Total news & events
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Complaints & Feedback</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.complaintsFeedback || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              User feedback
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Announcements</CardTitle>
+              <Bell className="h-4 w-4 text-purple-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.publicNotices || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Total announcements
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Enquiry Forms</CardTitle>
+              <HelpCircle className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.enquiryForms || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Student enquiries
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">News & Events</CardTitle>
-            <Newspaper className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.newsEvents || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Content articles
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Complaints & Feedback</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.complaintsFeedback || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                User feedback
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Announcements</CardTitle>
-            <Bell className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.publicNotices || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Official announcements
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">News & Events</CardTitle>
+              <Newspaper className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.newsEvents || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Content articles
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Blogs</CardTitle>
-            <BookOpen className="h-4 w-4 text-indigo-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.blogs}</div>
-            <p className="text-xs text-muted-foreground">
-              Article management
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Announcements</CardTitle>
+              <Bell className="h-4 w-4 text-purple-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.publicNotices || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                Official announcements
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Blogs</CardTitle>
+              <BookOpen className="h-4 w-4 text-indigo-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.blogs}</div>
+              <p className="text-xs text-muted-foreground">
+                Article management
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Recent Activity */}
       {/* <Card>
@@ -249,47 +282,74 @@ export default function DashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common administrative tasks</CardDescription>
+          <CardDescription>
+            {user?.role === 'event_publisher'
+              ? 'Create and manage news, events, and announcements'
+              : 'Common administrative tasks'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/dashboard/enquiry">
-                <HelpCircle className="h-6 w-6 mb-2" />
-                Manage Enquiry Forms
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/dashboard/complaint-feedback">
-                <AlertTriangle className="h-6 w-6 mb-2" />
-                Complaints & Feedback
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/dashboard/banners">
-                <Upload className="h-6 w-6 mb-2" />
-                Banner Management
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/dashboard/news-events">
-                <Newspaper className="h-6 w-6 mb-2" />
-                News & Events
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/dashboard/public-notices">
-                <Bell className="h-6 w-6 mb-2" />
-                Announcements
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/dashboard/blogs">
-                <BookOpen className="h-6 w-6 mb-2" />
-                Blog Management
-              </Link>
-            </Button>
-          </div>
+          {user?.role === 'event_publisher' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/news-events">
+                  <Newspaper className="h-6 w-6 mb-2" />
+                  Manage News & Events
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/public-notices">
+                  <Bell className="h-6 w-6 mb-2" />
+                  Manage Announcements
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/enquiry">
+                  <HelpCircle className="h-6 w-6 mb-2" />
+                  Manage Enquiry Forms
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/admission-forms">
+                  <GraduationCap className="h-6 w-6 mb-2" />
+                  Admission Forms
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/complaint-feedback">
+                  <AlertTriangle className="h-6 w-6 mb-2" />
+                  Complaints & Feedback
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/banners">
+                  <Upload className="h-6 w-6 mb-2" />
+                  Banner Management
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/news-events">
+                  <Newspaper className="h-6 w-6 mb-2" />
+                  News & Events
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/public-notices">
+                  <Bell className="h-6 w-6 mb-2" />
+                  Announcements
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-20 flex-col">
+                <Link href="/dashboard/blogs">
+                  <BookOpen className="h-6 w-6 mb-2" />
+                  Blog Management
+                </Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

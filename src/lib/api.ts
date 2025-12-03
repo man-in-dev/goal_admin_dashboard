@@ -1074,3 +1074,81 @@ export const courseApi = {
     return response.data;
   },
 }
+
+// Admission Form API
+export interface AdmissionForm {
+  _id: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  source: string;
+  applicationNo?: string;
+  gender: string;
+  dateOfBirth: string;
+  placeOfBirth?: string;
+  category: string;
+  nationality: string;
+  motherTongue?: string;
+  alternateContact: string;
+  pinCode?: string;
+  passportPhoto?: string;
+  fatherName: string;
+  fatherMobile: string;
+  fatherWhatsApp: string;
+  fatherOccupation: string;
+  motherName: string;
+  motherMobile: string;
+  motherOccupation: string;
+  annualFamilyIncome: string;
+  guardianName?: string;
+  guardianMobile?: string;
+  guardianWhatsApp?: string;
+  guardianRelationship?: string;
+  previousClass: string;
+  previousSchool: string;
+  previousBoard: string;
+  previousYear: string;
+  previousMarks: string;
+  previousGrade?: string;
+  classSeekingAdmission: string;
+  preferredTestDate: string;
+  preferredTestCentre: string;
+  reportCard?: string;
+  birthCertificate?: string;
+  idProof?: string;
+  declarationAccepted: boolean;
+  parentGuardianName: string;
+  declarationDate: string;
+  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'admitted';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const admissionFormApi = {
+  getAdmissionForms: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    classSeekingAdmission?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/admission-form', { params });
+    return response.data;
+  },
+
+  getAdmissionFormById: async (id: string) => {
+    const response = await api.get(`/admission-form/${id}`);
+    return response.data;
+  },
+
+  updateAdmissionFormStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/admission-form/${id}/status`, { status });
+    return response.data;
+  },
+
+  deleteAdmissionForm: async (id: string) => {
+    const response = await api.delete(`/admission-form/${id}`);
+    return response.data;
+  },
+}

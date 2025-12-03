@@ -4,7 +4,11 @@ export interface AdminUser {
   id: string
   email: string
   name: string
-  role: 'admin' | 'super-admin'
+  // Role comes from backend JWT (`User.role`)
+  // - 'admin': full access to all dashboard modules
+  // - 'event_publisher': limited to home content (news & events, announcements)
+  // - 'user': regular authenticated user (typically no dashboard access)
+  role: 'admin' | 'event_publisher' | 'user'
 }
 
 export function getServerSession(): AdminUser | null {

@@ -77,14 +77,28 @@ const navigation = [
     ]
   },
   { name: "Enquiry Forms", href: "/dashboard/enquiry", icon: HelpCircle },
+  { name: "Admission Forms", href: "/dashboard/admission-forms", icon: GraduationCap },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
-];
+] as const;
 
 export function DashboardSidebar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const pathname = usePathname();
   const { user, logout } = useAuth();
+
+  // Only allow limited menu items for event publisher role
+  const filteredNavigation = navigation.filter((item) => {
+    if (!user) return false;
+
+    if (user.role === 'event_publisher') {
+      // Event publisher: dashboard + home (news & events, announcements)
+      return item.name === 'Dashboard' || item.name === 'Home';
+    }
+
+    // Admin or other roles: full navigation
+    return true;
+  });
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus((prev) => {
@@ -188,9 +202,9 @@ export function DashboardSidebar() {
             <h1 className="text-xl font-bold text-gray-900">Goal Institute</h1>
           </div>
 
-          {/* Navigation */}
+              {/* Navigation */}
           <nav className="flex-1 px-4 py-3 space-y-2 overflow-y-auto overflow-x-hidden sidebar-nav">
-            {navigation.map((item) => {
+            {(filteredNavigation as typeof navigation).map((item) => {
               const isActive = isMenuActive(item);
               const isExpanded = expandedMenus.has(item.name);
               const hasChildren = item.children && item.children.length > 0;
