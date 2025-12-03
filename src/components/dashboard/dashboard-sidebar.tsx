@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   Settings,
@@ -28,7 +29,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/auth-provider";
 
-const navigation = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  children?: NavigationItem[];
+}
+
+const navigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { 
     name: "Home", 
@@ -79,7 +87,7 @@ const navigation = [
   { name: "Enquiry Forms", href: "/dashboard/enquiry", icon: HelpCircle },
   { name: "Admission Forms", href: "/dashboard/admission-forms", icon: GraduationCap },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
-] as const;
+];
 
 export function DashboardSidebar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -88,7 +96,7 @@ export function DashboardSidebar() {
   const { user, logout } = useAuth();
 
   // Only allow limited menu items for event publisher role
-  const filteredNavigation = navigation.filter((item) => {
+  const filteredNavigation: NavigationItem[] = navigation.filter((item) => {
     if (!user) return false;
 
     if (user.role === 'event_publisher') {
@@ -112,7 +120,7 @@ export function DashboardSidebar() {
     });
   };
 
-  const isMenuActive = (item: any) => {
+  const isMenuActive = (item: NavigationItem) => {
     if (item.href && pathname === item.href && item.href !== "#") return true;
     if (item.children) {
       return item.children.some((child: any) => {
@@ -149,14 +157,16 @@ export function DashboardSidebar() {
             const newSet = new Set(prev);
             newSet.add(item.name);
             // Also expand the parent if it has nested children
-            item.children.forEach((child: any) => {
-              if (child.children) {
-                const hasActiveGrandchild = child.children.some((grandchild: any) => pathname === grandchild.href);
-                if (hasActiveGrandchild) {
-                  newSet.add(child.name);
+            if (item.children) {
+              item.children.forEach((child) => {
+                if (child.children) {
+                  const hasActiveGrandchild = child.children.some((grandchild: any) => pathname === grandchild.href);
+                  if (hasActiveGrandchild) {
+                    newSet.add(child.name);
+                  }
                 }
-              }
-            });
+              });
+            }
             return newSet;
           });
         }
@@ -204,7 +214,7 @@ export function DashboardSidebar() {
 
               {/* Navigation */}
           <nav className="flex-1 px-4 py-3 space-y-2 overflow-y-auto overflow-x-hidden sidebar-nav">
-            {(filteredNavigation as typeof navigation).map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = isMenuActive(item);
               const isExpanded = expandedMenus.has(item.name);
               const hasChildren = item.children && item.children.length > 0;
@@ -246,7 +256,7 @@ export function DashboardSidebar() {
                           )}
                         </button>
                       </div>
-                      {isExpanded && (
+                      {isExpanded && item.children && (
                         <div className="ml-4 mt-1 space-y-1">
                           {item.children.map((child: any) => {
                             const isChildActive = isMenuActive(child);
