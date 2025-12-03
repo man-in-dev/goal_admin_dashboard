@@ -192,7 +192,7 @@ export default function AdmissionFormsPage() {
         const response = await admissionFormApi.getAdmissionForms(params);
         // Handle nested data structure from API response
         const responseData = response.data?.data || response.data || response;
-        const forms = responseData.admissionForms || [];
+        const forms = (responseData.admissionForms || []) as AdmissionForm[];
         
         // Convert to CSV
         const headers = [
@@ -201,7 +201,7 @@ export default function AdmissionFormsPage() {
           'Status', 'Created At'
         ];
         
-        const rows = forms.map((form: AdmissionForm) => [
+        const rows: string[][] = forms.map((form: AdmissionForm) => [
           form.applicationNo || '',
           form.name,
           form.email,
@@ -217,7 +217,7 @@ export default function AdmissionFormsPage() {
         
         const csvContent = [
           headers.join(','),
-          ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+          ...rows.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(','))
         ].join('\n');
         
         const blob = new Blob([csvContent], { type: 'text/csv' });
