@@ -1152,3 +1152,60 @@ export const admissionFormApi = {
     return response.data;
   },
 }
+
+// Chat Message API
+export interface ChatMessage {
+  _id: string;
+  sessionId: string;
+  userId?: string;
+  userName?: string;
+  userEmail?: string;
+  userPhone?: string;
+  message: string;
+  response?: string;
+  role: 'user' | 'assistant';
+  metadata?: {
+    ipAddress?: string;
+    userAgent?: string;
+    pageUrl?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const chatApi = {
+  getChatMessages: async (params?: {
+    page?: number;
+    limit?: number;
+    sessionId?: string;
+    role?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/chat/messages', { params });
+    // Backend wraps payload as { success, message, data: { ... } }
+    return response.data.data;
+  },
+
+  getChatMessagesBySession: async (sessionId: string, params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get(`/chat/messages/${sessionId}`, { params });
+    return response.data.data;
+  },
+
+  getStatsByDevice: async (deviceId: string) => {
+    const response = await api.get(`/chat/messages/device/${deviceId}`);
+    return response.data.data;
+  },
+
+  deleteChatMessage: async (id: string) => {
+    const response = await api.delete(`/chat/messages/${id}`);
+    return response.data;
+  },
+
+  deleteChatSession: async (sessionId: string) => {
+    const response = await api.delete(`/chat/messages/session/${sessionId}`);
+    return response.data;
+  },
+}
