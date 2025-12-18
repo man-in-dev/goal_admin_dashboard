@@ -25,6 +25,7 @@ import {
   Users,
   Home,
   Calendar,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -86,6 +87,7 @@ const navigation: NavigationItem[] = [
   },
   { name: "Enquiry Forms", href: "/dashboard/enquiry", icon: HelpCircle },
   { name: "Admission Forms", href: "/dashboard/admission-forms", icon: GraduationCap },
+  { name: "Chatbot Insights", href: "/dashboard/chatbot-insights", icon: MessageSquare },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
