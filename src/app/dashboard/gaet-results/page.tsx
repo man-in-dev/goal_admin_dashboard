@@ -580,7 +580,8 @@ export default function GAETResultsPage() {
                       <TableCell>
                         <Badge variant="outline">{result.testName}</Badge>
                       </TableCell>
-                      <TableCell>{formatDate(result.testDate)}</TableCell>
+                      {/* <TableCell>{formatDate(result.testDate)}</TableCell> */}
+                      <TableCell>{result.testDate}</TableCell>
                       <TableCell>{result.testCenter || 'N/A'}</TableCell>
                       <TableCell>{result.totalMarks}</TableCell>
                       <TableCell>
