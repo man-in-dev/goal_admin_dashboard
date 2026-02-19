@@ -1026,6 +1026,52 @@ export const aitsVideoSolutionApi = {
   },
 }
 
+// Spot Test Video Solution API
+export interface SpotTestVideoSolution {
+  _id: string;
+  testName: string;
+  subject: string;
+  videoLink?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const spotTestVideoSolutionApi = {
+  getSpotTestVideoSolutions: async (params?: {
+    activeOnly?: boolean;
+  }) => {
+    const response = await api.get('/spot-test-video-solutions', { params })
+    return response.data
+  },
+
+  getSpotTestVideoSolutionById: async (id: string) => {
+    const response = await api.get(`/spot-test-video-solutions/${id}`)
+    return response.data
+  },
+
+  createSpotTestVideoSolution: async (data: Partial<SpotTestVideoSolution>) => {
+    const response = await api.post('/spot-test-video-solutions', data)
+    return response.data
+  },
+
+  updateSpotTestVideoSolution: async (id: string, data: Partial<SpotTestVideoSolution>) => {
+    const response = await api.put(`/spot-test-video-solutions/${id}`, data)
+    return response.data
+  },
+
+  deleteSpotTestVideoSolution: async (id: string) => {
+    const response = await api.delete(`/spot-test-video-solutions/${id}`)
+    return response.data
+  },
+
+  bulkDeleteSpotTestVideoSolutions: async (ids: string[]) => {
+    const response = await api.delete('/spot-test-video-solutions', { data: { ids } })
+    return response.data
+  },
+}
+
 // Course API
 export interface Course {
   _id: string;

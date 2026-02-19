@@ -73,6 +73,7 @@ const navigation: NavigationItem[] = [
     children: [
       { name: "Complaints & Feedback", href: "/dashboard/complaint-feedback", icon: AlertTriangle },
       { name: "AITS Video Solutions", href: "/dashboard/aits-video-solutions", icon: Video },
+      { name: "Spot Test Video Solutions", href: "/dashboard/spot-test-video-solutions", icon: Video },
       { name: "GVET Answer Keys", href: "/dashboard/gvet-answer-keys", icon: FileText },
     ]
   },
