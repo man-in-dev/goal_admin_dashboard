@@ -1258,9 +1258,10 @@ export const chatApi = {
 
 // Upload API
 export const uploadApi = {
-  uploadPdf: async (file: File) => {
+  uploadPdf: async (file: File, name: string) => {
     const formData = new FormData()
     formData.append('pdf', file)
+    formData.append('name', name)
     
     const response = await api.post('/upload/pdf', formData, {
       headers: {
@@ -1268,5 +1269,20 @@ export const uploadApi = {
       },
     })
     return response.data
+  },
+
+  getPdfs: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) => {
+    const response = await api.get('/upload/pdfs', { params })
+    return response.data
+  },
+
+  deletePdf: async (id: string) => {
+    const response = await api.delete(`/upload/pdfs/${id}`)
+    return response.data
   }
-}
+}
+
