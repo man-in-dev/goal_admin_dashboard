@@ -50,8 +50,8 @@ export default function PdfUploadPage() {
         setFile(null);
         return;
       }
-      if (selectedFile.size > 24 * 1024 * 1024) {
-        setError('File size exceeds 24MB limit');
+      if (selectedFile.size > 25 * 1024 * 1024) {
+        setError('File size exceeds 25MB limit');
         setFile(null);
         return;
       }
@@ -97,7 +97,7 @@ export default function PdfUploadPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this document?')) return;
-    
+
     try {
       setOperationLoading(id);
       const response = await uploadApi.deletePdf(id);
@@ -113,7 +113,7 @@ export default function PdfUploadPage() {
     }
   };
 
-  const filteredPdfs = pdfs.filter(pdf => 
+  const filteredPdfs = pdfs.filter(pdf =>
     pdf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pdf.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -125,7 +125,7 @@ export default function PdfUploadPage() {
           <h1 className="text-3xl font-bold text-gray-900">PDF Document Repository</h1>
           <p className="text-gray-600 mt-1">Manage all public and private PDF assets in one place</p>
         </div>
-        
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700 h-11 px-6 font-bold shadow-lg shadow-blue-100 flex items-center gap-2">
@@ -137,8 +137,8 @@ export default function PdfUploadPage() {
             <div className="bg-blue-600 p-8 text-white relative">
               <DialogHeader className="text-left">
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                   <Upload className="h-6 w-6" />
-                   New PDF Asset
+                  <Upload className="h-6 w-6" />
+                  New PDF Asset
                 </DialogTitle>
                 <DialogDescription className="text-blue-100 mt-2 font-medium">
                   Fill in the name and select a file to store it in our secure cloud storage.
@@ -151,7 +151,7 @@ export default function PdfUploadPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="doc-name" className="text-sm font-bold text-gray-700">Document Title *</Label>
-                  <Input 
+                  <Input
                     id="doc-name"
                     value={docName}
                     onChange={(e) => setDocName(e.target.value)}
@@ -164,7 +164,7 @@ export default function PdfUploadPage() {
                 <div className="space-y-2">
                   <Label className="text-sm font-bold text-gray-700">PDF Document *</Label>
                   {!file ? (
-                    <div 
+                    <div
                       className={`group border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50/50 hover:border-blue-400 ${error ? 'border-red-200' : 'border-gray-200'}`}
                       onClick={() => document.getElementById('pdf-file')?.click()}
                     >
@@ -172,7 +172,7 @@ export default function PdfUploadPage() {
                         <Upload className="h-6 w-6" />
                       </div>
                       <p className="text-sm font-bold text-gray-900">Select Document</p>
-                      <p className="text-xs text-gray-500 mt-1">PDF only, Max 24MB</p>
+                      <p className="text-xs text-gray-500 mt-1">PDF only, Max 25MB</p>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl">
@@ -213,7 +213,7 @@ export default function PdfUploadPage() {
               <Button variant="outline" className="h-12 px-6 rounded-xl border-gray-200 font-bold text-gray-600" onClick={() => setIsDialogOpen(false)} disabled={uploading}>
                 Cancel
               </Button>
-              <Button 
+              <Button
                 className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-lg shadow-blue-100 transition-all active:scale-[0.98]"
                 onClick={handleUpload}
                 disabled={!file || !docName || uploading}
@@ -241,8 +241,8 @@ export default function PdfUploadPage() {
             </div>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input 
-                placeholder="Search by name or filename..." 
+              <Input
+                placeholder="Search by name or filename..."
                 className="pl-11 h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-500 focus:bg-white transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -290,14 +290,14 @@ export default function PdfUploadPage() {
                         </TableCell>
                         <TableCell className="py-5">
                           <div className="flex flex-col gap-0.5">
-                             <div className="flex items-center gap-2">
-                               <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                               <span className="text-[11px] text-gray-500 font-bold">{(pdf.size / (1024 * 1024)).toFixed(2)} MB</span>
-                             </div>
-                             <div className="flex items-center gap-2">
-                               <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                               <span className="text-[11px] text-gray-500 font-bold uppercase tracking-tighter">Document/PDF</span>
-                             </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                              <span className="text-[11px] text-gray-500 font-bold">{(pdf.size / (1024 * 1024)).toFixed(2)} MB</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                              <span className="text-[11px] text-gray-500 font-bold uppercase tracking-tighter">Document/PDF</span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="py-5">
