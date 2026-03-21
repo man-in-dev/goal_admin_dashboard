@@ -1255,3 +1255,18 @@ export const chatApi = {
     return response.data;
   },
 }
+
+// Upload API
+export const uploadApi = {
+  uploadPdf: async (file: File) => {
+    const formData = new FormData()
+    formData.append('pdf', file)
+    
+    const response = await api.post('/upload/pdf', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  }
+}

@@ -55,6 +55,7 @@ const navigation: NavigationItem[] = [
     children: [
       { name: "Banner Management", href: "/dashboard/banners", icon: Upload },
       { name: "Blogs", href: "/dashboard/blogs", icon: BookOpen },
+      { name: "PDF Upload", href: "/dashboard/pdf-upload", icon: FileText },
     ]
   },
   { 
