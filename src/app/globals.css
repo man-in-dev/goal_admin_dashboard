@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Quill Editor Styles */
-@import 'react-quill/dist/quill.snow.css';
+@import 'react-quill-new/dist/quill.snow.css';
 
 @layer components {
   .sidebar-container {

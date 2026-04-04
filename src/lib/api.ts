@@ -1258,16 +1258,8 @@ export const chatApi = {
 
 // Upload API
 export const uploadApi = {
-  uploadPdf: async (file: File, name: string) => {
-    const formData = new FormData()
-    formData.append('pdf', file)
-    formData.append('name', name)
-    
-    const response = await api.post('/upload/pdf', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+  uploadPdf: async (data: { name: string; url: string; filename: string; size: number }) => {
+    const response = await api.post('/upload/pdf', data)
     return response.data
   },
 

@@ -702,11 +702,6 @@ function EditBannerForm({
             maxSize={10}
             acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
             preview={true}
-            requiredDimensions={{
-              width: 1920,
-              height: 400,
-              label: "Desktop"
-            }}
           />
         </div>
         
@@ -725,11 +720,6 @@ function EditBannerForm({
             maxSize={10}
             acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
             preview={true}
-            requiredDimensions={{
-              width: 640,
-              height: 280,
-              label: "Mobile"
-            }}
           />
         </div>
       </div>
@@ -856,11 +846,6 @@ function CreateBannerForm({
             maxSize={10}
             acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
             preview={true}
-            requiredDimensions={{
-              width: 1920,
-              height: 400,
-              label: "Desktop"
-            }}
           />
         </div>
         
@@ -879,11 +864,6 @@ function CreateBannerForm({
             maxSize={10}
             acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
             preview={true}
-            requiredDimensions={{
-              width: 640,
-              height: 280,
-              label: "Mobile"
-            }}
           />
         </div>
       </div>

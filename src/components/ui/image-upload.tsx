@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { uploadToCloudinary } from '@/lib/cloudinary';
+import { uploadFileToSpaces } from '@/lib/storage';
 
 interface ImageUploadProps {
   value: string;
@@ -115,12 +115,12 @@ export function ImageUpload({
     setIsUploading(true);
 
     try {
-      // Upload to Cloudinary
-      const cloudinaryUrl = await uploadToCloudinary(file);
+      // Upload to DigitalOcean Spaces
+      const spaceUrl = await uploadFileToSpaces(file);
       
-      if (cloudinaryUrl) {
-        setPreviewUrl(cloudinaryUrl);
-        onChange(cloudinaryUrl);
+      if (spaceUrl) {
+        setPreviewUrl(spaceUrl);
+        onChange(spaceUrl);
         
         // Auto-generate alt text from filename
         const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
@@ -128,16 +128,16 @@ export function ImageUpload({
         
         toast({
           title: "Image uploaded successfully",
-          description: "Your image has been uploaded to Cloudinary and is ready to use.",
+          description: "Your image has been uploaded to DigitalOcean Spaces and is ready to use.",
         });
       } else {
-        throw new Error('Failed to upload to Cloudinary');
+        throw new Error('Failed to upload to DigitalOcean Spaces');
       }
     } catch (error) {
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload image to Cloudinary. Please try again.",
+        description: "Failed to upload image to DigitalOcean Spaces. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -206,7 +206,7 @@ export function ImageUpload({
         {isUploading ? (
           <div className="space-y-2">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-sm text-gray-600">Uploading image...</p>
+            <p className="text-sm text-gray-600">Uploading to DigitalOcean Spaces...</p>
           </div>
         ) : previewUrl || value ? (
           <div className="space-y-4">

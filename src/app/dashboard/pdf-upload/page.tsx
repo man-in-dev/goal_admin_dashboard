@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { uploadApi } from '@/lib/api';
+import { uploadFileToSpaces } from '@/lib/storage';
 import { FileText, Copy, Check, Upload, X, Loader2, Trash2, Search, ExternalLink, Plus } from 'lucide-react';
 
 export default function PdfUploadPage() {
@@ -72,14 +73,29 @@ export default function PdfUploadPage() {
     try {
       setUploading(true);
       setError(null);
-      const response = await uploadApi.uploadPdf(file, docName);
+      
+      // 1. Upload to DigitalOcean Spaces first
+      const uploadUrl = await uploadFileToSpaces(file);
+      
+      if (!uploadUrl) {
+        throw new Error('Failed to upload file to storage');
+      }
+
+      // 2. Register with server
+      const response = await uploadApi.uploadPdf({
+        name: docName,
+        url: uploadUrl,
+        filename: file.name,
+        size: file.size
+      });
+
       if (response.success) {
         setFile(null);
         setDocName('');
         setIsDialogOpen(false);
         fetchPdfs(); // Refresh list
       } else {
-        setError(response.message || 'Failed to upload PDF');
+        setError(response.message || 'Failed to register PDF on server');
       }
     } catch (err: any) {
       console.error('Upload error:', err);
