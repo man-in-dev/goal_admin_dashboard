@@ -89,6 +89,7 @@ const navigation: NavigationItem[] = [
   },
   { name: "Enquiry Forms", href: "/dashboard/enquiry", icon: HelpCircle },
   { name: "Admission Forms", href: "/dashboard/admission-forms", icon: GraduationCap },
+  { name: "Summer Camp 2026", href: "/dashboard/summer-camp", icon: Calendar },
   { name: "Chatbot Insights", href: "/dashboard/chatbot-insights", icon: MessageSquare },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

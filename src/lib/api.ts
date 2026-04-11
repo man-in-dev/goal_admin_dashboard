@@ -702,6 +702,52 @@ export const bannerApi = {
   }
 }
 
+// Summer Camp Registration API
+export interface SummerCampRegistration {
+  _id: string;
+  studentName: string;
+  fatherName: string;
+  dob: string;
+  category: string;
+  gender: string;
+  address: string;
+  state: string;
+  district: string;
+  pinCode: string;
+  studentMobile: string;
+  parentMobile: string;
+  currentClass: string;
+  schoolName: string;
+  examCenter: string;
+  photograph?: string;
+  rollNumber: string;
+  status: 'pending' | 'contacted' | 'resolved' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const summerCampApi = {
+  getRegistrations: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/summer-camp', { params });
+    return response.data;
+  },
+
+  updateStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/summer-camp/${id}/status`, { status });
+    return response.data;
+  },
+
+  deleteRegistration: async (id: string) => {
+    const response = await api.delete(`/summer-camp/${id}`);
+    return response.data;
+  },
+};
+
 // Result API
 export interface Result {
   _id: string;
