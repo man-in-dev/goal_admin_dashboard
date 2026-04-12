@@ -76,6 +76,7 @@ const navigation: NavigationItem[] = [
       { name: "AITS Video Solutions", href: "/dashboard/aits-video-solutions", icon: Video },
       { name: "Spot Test Video Solutions", href: "/dashboard/spot-test-video-solutions", icon: Video },
       { name: "GVET Answer Keys", href: "/dashboard/gvet-answer-keys", icon: FileText },
+      { name: "Summer Camp", href: "/dashboard/summer-camp", icon: Calendar },
     ]
   },
   { 
