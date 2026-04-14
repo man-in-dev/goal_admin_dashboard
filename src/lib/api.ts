@@ -1174,6 +1174,7 @@ export interface AdmissionForm {
 export interface SummerCampRegistration {
   _id: string;
   studentName: string;
+  gtseRollNumber?: string;
   fatherName: string;
   fatherOccupation?: string;
   dob: string;

@@ -92,6 +92,10 @@ export function SummerCampDetailsModal({ registration, isOpen, onClose }: Summer
                   <Label className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">Date of Birth</Label>
                   <p className="text-sm font-medium">{registration.dob}</p>
                 </div>
+                <div>
+                  <Label className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">GTSE Roll Number</Label>
+                  <p className="text-sm font-medium font-mono text-blue-700">{registration.gtseRollNumber || 'N/A'}</p>
+                </div>
               </div>
             </section>
 
