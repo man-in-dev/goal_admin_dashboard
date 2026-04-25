@@ -19,11 +19,13 @@ import {
   Users,
   Calendar,
   MapPin,
-  Trophy
+  Trophy,
+  IdCard
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { summerCampApi, SummerCampRegistration } from '@/lib/api';
 import { SummerCampDetailsModal } from '@/components/dashboard/summer-camp/summer-camp-details-modal';
+import { SummerCampAdmitCardModal } from '@/components/dashboard/summer-camp/summer-camp-admit-card-modal';
 import { handleCSVDownload, generateFilename } from '@/lib/csv-utils';
 
 export default function SummerCampPage() {
@@ -33,6 +35,7 @@ export default function SummerCampPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRegistration, setSelectedRegistration] = useState<SummerCampRegistration | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isAdmitCardOpen, setIsAdmitCardOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -360,6 +363,18 @@ export default function SummerCampPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 text-indigo-600 hover:bg-indigo-100 rounded-full"
+                          title="View Admin Card"
+                          onClick={() => {
+                            setSelectedRegistration(reg);
+                            setIsAdmitCardOpen(true);
+                          }}
+                        >
+                          <IdCard className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 text-red-600 hover:bg-red-100 rounded-full"
                           onClick={() => handleDelete(reg._id)}
                         >
@@ -406,6 +421,12 @@ export default function SummerCampPage() {
         registration={selectedRegistration}
         isOpen={isViewDialogOpen}
         onClose={() => setIsViewDialogOpen(false)}
+      />
+
+      <SummerCampAdmitCardModal 
+        registration={selectedRegistration}
+        isOpen={isAdmitCardOpen}
+        onClose={() => setIsAdmitCardOpen(false)}
       />
     </div>
   );

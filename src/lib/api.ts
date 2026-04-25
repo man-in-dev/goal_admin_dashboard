@@ -1038,6 +1038,16 @@ export interface SpotTestVideoSolution {
   updatedAt: string;
 }
 
+export interface Neet2026AnswerKey {
+  _id: string;
+  subject: string;
+  videoLink?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const spotTestVideoSolutionApi = {
   getSpotTestVideoSolutions: async (params?: {
     activeOnly?: boolean;
@@ -1068,6 +1078,40 @@ export const spotTestVideoSolutionApi = {
 
   bulkDeleteSpotTestVideoSolutions: async (ids: string[]) => {
     const response = await api.delete('/spot-test-video-solutions', { data: { ids } })
+    return response.data
+  },
+}
+
+export const neet2026AnswerKeyApi = {
+  getNeet2026AnswerKeys: async (params?: {
+    activeOnly?: boolean;
+  }) => {
+    const response = await api.get('/neet-2026-answerkey', { params })
+    return response.data
+  },
+
+  getNeet2026AnswerKeyById: async (id: string) => {
+    const response = await api.get(`/neet-2026-answerkey/${id}`)
+    return response.data
+  },
+
+  createNeet2026AnswerKey: async (data: Partial<Neet2026AnswerKey>) => {
+    const response = await api.post('/neet-2026-answerkey', data)
+    return response.data
+  },
+
+  updateNeet2026AnswerKey: async (id: string, data: Partial<Neet2026AnswerKey>) => {
+    const response = await api.put(`/neet-2026-answerkey/${id}`, data)
+    return response.data
+  },
+
+  deleteNeet2026AnswerKey: async (id: string) => {
+    const response = await api.delete(`/neet-2026-answerkey/${id}`)
+    return response.data
+  },
+
+  bulkDeleteNeet2026AnswerKeys: async (ids: string[]) => {
+    const response = await api.delete('/neet-2026-answerkey', { data: { ids } })
     return response.data
   },
 }

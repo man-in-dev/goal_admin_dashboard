@@ -75,6 +75,7 @@ const navigation: NavigationItem[] = [
       { name: "Complaints & Feedback", href: "/dashboard/complaint-feedback", icon: AlertTriangle },
       { name: "AITS Video Solutions", href: "/dashboard/aits-video-solutions", icon: Video },
       { name: "Spot Test Video Solutions", href: "/dashboard/spot-test-video-solutions", icon: Video },
+      { name: "NEET 2026 Answer Key", href: "/dashboard/neet-2026-answerkey", icon: Video },
       { name: "GVET Answer Keys", href: "/dashboard/gvet-answer-keys", icon: FileText },
       { name: "Summer Camp", href: "/dashboard/summer-camp", icon: Calendar },
     ]
