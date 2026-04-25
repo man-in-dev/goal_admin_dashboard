@@ -24,6 +24,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { summerCampApi, SummerCampRegistration } from '@/lib/api';
 import { SummerCampDetailsModal } from '@/components/dashboard/summer-camp/summer-camp-details-modal';
+import { handleCSVDownload, generateFilename } from '@/lib/csv-utils';
 
 export default function SummerCampPage() {
   const [registrations, setRegistrations] = useState<SummerCampRegistration[]>([]);
@@ -133,42 +134,28 @@ export default function SummerCampPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = [
-      'Roll Number', 'Student Name', 'Father Name', 'Mobile', 'Category', 'Gender',
-      'Class', 'School', 'Exam Center', 'Status', 'Registered On'
-    ];
-    
-    const rows = registrations.map(reg => [
-      reg.rollNumber,
-      reg.studentName,
-      reg.fatherName,
-      reg.studentMobile,
-      reg.category,
-      reg.gender,
-      reg.currentClass,
-      reg.schoolName,
-      reg.examCenter,
-      reg.status,
-      new Date(reg.createdAt).toLocaleString()
-    ]);
-    
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `summer-camp-registrations-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
+  const handleExportCSV = async () => {
+    try {
+      const params: any = {};
+      if (statusFilter !== 'all') params.status = statusFilter;
+      if (searchTerm) params.search = searchTerm;
 
+      await handleCSVDownload(
+        () => summerCampApi.downloadRegistrationsCSV(params),
+        generateFilename('summer-camp-registrations'),
+        (error) => {
+          toast({
+            title: "Error",
+            description: "Failed to download CSV",
+            variant: "destructive",
+          });
+        }
+      );
+    } catch (error) {
+      console.error('Export error:', error);
+    }
+  };
+    
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { variant: 'secondary' as const, icon: Clock, color: 'text-yellow-600', label: 'Pending' },

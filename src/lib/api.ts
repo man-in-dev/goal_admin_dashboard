@@ -1258,6 +1258,17 @@ export const summerCampApi = {
     const response = await api.get('/summer-camp/stats');
     return response.data;
   },
+  
+  downloadRegistrationsCSV: async (params?: {
+    status?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/summer-camp/download-csv', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
 }
 
 // Chat Message API
