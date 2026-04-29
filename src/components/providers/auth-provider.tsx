@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for existing token on mount
     const token = localStorage.getItem('admin-token')
     const userData = localStorage.getItem('admin-user')
-    
+
     if (token && userData) {
       try {
         // Use stored user data from localStorage
@@ -37,9 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       console.log('Auth provider: Starting login process')
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.goalinstitute.org/api'
       console.log('Auth provider: API URL:', API_BASE_URL)
-      
+
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Store in localStorage only
         localStorage.setItem('admin-token', data.token)
         localStorage.setItem('admin-user', JSON.stringify(data.user))
-        
+
         setUser(data.user)
         console.log('Auth provider: User set:', data.user)
         return { success: true }

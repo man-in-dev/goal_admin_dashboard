@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.goalinstitute.org/api'
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -197,7 +197,7 @@ export const formApi = {
     status?: string
     search?: string
   }) => {
-    const response = await api.get('/enquiry/download-csv', { 
+    const response = await api.get('/enquiry/download-csv', {
       params,
       responseType: 'blob'
     })
@@ -241,7 +241,7 @@ export const formApi = {
     type?: string
     search?: string
   }) => {
-    const response = await api.get('/complaint-feedback/download-csv', { 
+    const response = await api.get('/complaint-feedback/download-csv', {
       params,
       responseType: 'blob'
     })
@@ -374,7 +374,7 @@ export const newsEventApi = {
   },
 
   getNewsEventsByTags: async (tags: string[]) => {
-    const response = await api.get('/news-events/tags', { 
+    const response = await api.get('/news-events/tags', {
       params: { tags: tags.join(',') }
     })
     return response.data
@@ -702,52 +702,6 @@ export const bannerApi = {
   }
 }
 
-// Summer Camp Registration API
-export interface SummerCampRegistration {
-  _id: string;
-  studentName: string;
-  fatherName: string;
-  dob: string;
-  category: string;
-  gender: string;
-  address: string;
-  state: string;
-  district: string;
-  pinCode: string;
-  studentMobile: string;
-  parentMobile: string;
-  currentClass: string;
-  schoolName: string;
-  examCenter: string;
-  photograph?: string;
-  rollNumber: string;
-  status: 'pending' | 'contacted' | 'resolved' | 'rejected';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export const summerCampApi = {
-  getRegistrations: async (params?: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    search?: string;
-  }) => {
-    const response = await api.get('/summer-camp', { params });
-    return response.data;
-  },
-
-  updateStatus: async (id: string, status: string) => {
-    const response = await api.patch(`/summer-camp/${id}/status`, { status });
-    return response.data;
-  },
-
-  deleteRegistration: async (id: string) => {
-    const response = await api.delete(`/summer-camp/${id}`);
-    return response.data;
-  },
-};
-
 // Result API
 export interface Result {
   _id: string;
@@ -778,7 +732,7 @@ export interface Result {
   uploadedBy: string;
   createdAt?: string;
   updatedAt: string;
-  
+
   // New optional fields for filtering
   testType?: 'CLASSROOM_TEST' | 'SURPRISE_TEST' | 'MOCK_TEST' | 'FINAL_TEST';
   examId?: string;
@@ -835,7 +789,7 @@ export const resultApi = {
     const formData = new FormData()
     formData.append('csvFile', file)
     formData.append('uploadedBy', uploadedBy)
-    
+
     const response = await api.post('/result/upload-csv', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -972,7 +926,7 @@ export const gaetResultsApi = {
   uploadCSVGAETResults: async (file: File) => {
     const formData = new FormData()
     formData.append('csvFile', file)
-    
+
     const response = await api.post('/gaet-results/upload-csv', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -1084,6 +1038,16 @@ export interface SpotTestVideoSolution {
   updatedAt: string;
 }
 
+export interface Neet2026AnswerKey {
+  _id: string;
+  subject: string;
+  videoLink?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const spotTestVideoSolutionApi = {
   getSpotTestVideoSolutions: async (params?: {
     activeOnly?: boolean;
@@ -1114,6 +1078,40 @@ export const spotTestVideoSolutionApi = {
 
   bulkDeleteSpotTestVideoSolutions: async (ids: string[]) => {
     const response = await api.delete('/spot-test-video-solutions', { data: { ids } })
+    return response.data
+  },
+}
+
+export const neet2026AnswerKeyApi = {
+  getNeet2026AnswerKeys: async (params?: {
+    activeOnly?: boolean;
+  }) => {
+    const response = await api.get('/neet-2026-answerkey', { params })
+    return response.data
+  },
+
+  getNeet2026AnswerKeyById: async (id: string) => {
+    const response = await api.get(`/neet-2026-answerkey/${id}`)
+    return response.data
+  },
+
+  createNeet2026AnswerKey: async (data: Partial<Neet2026AnswerKey>) => {
+    const response = await api.post('/neet-2026-answerkey', data)
+    return response.data
+  },
+
+  updateNeet2026AnswerKey: async (id: string, data: Partial<Neet2026AnswerKey>) => {
+    const response = await api.put(`/neet-2026-answerkey/${id}`, data)
+    return response.data
+  },
+
+  deleteNeet2026AnswerKey: async (id: string) => {
+    const response = await api.delete(`/neet-2026-answerkey/${id}`)
+    return response.data
+  },
+
+  bulkDeleteNeet2026AnswerKeys: async (ids: string[]) => {
+    const response = await api.delete('/neet-2026-answerkey', { data: { ids } })
     return response.data
   },
 }
@@ -1217,6 +1215,35 @@ export interface AdmissionForm {
   updatedAt: string;
 }
 
+export interface SummerCampRegistration {
+  _id: string;
+  studentName: string;
+  gtseRollNumber?: string;
+  fatherName: string;
+  fatherOccupation?: string;
+  dob: string;
+  category: string;
+  gender: string;
+  address: string;
+  state: string;
+  district: string;
+  postOffice?: string;
+  pinCode: string;
+  studentMobile: string;
+  studentWhatsApp?: string;
+  parentMobile: string;
+  parentWhatsApp?: string;
+  currentClass: string;
+  schoolName: string;
+  schoolAddress?: string;
+  examCenter: string;
+  photograph?: string;
+  rollNumber: string;
+  status: 'pending' | 'approved' | 'rejected' | 'attended';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const admissionFormApi = {
   getAdmissionForms: async (params?: {
     page?: number;
@@ -1241,6 +1268,49 @@ export const admissionFormApi = {
 
   deleteAdmissionForm: async (id: string) => {
     const response = await api.delete(`/admission-form/${id}`);
+    return response.data;
+  },
+}
+
+export const summerCampApi = {
+  getRegistrations: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/summer-camp', { params });
+    return response.data;
+  },
+
+  getRegistrationById: async (id: string) => {
+    const response = await api.get(`/summer-camp/${id}`);
+    return response.data;
+  },
+
+  updateRegistrationStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/summer-camp/${id}/status`, { status });
+    return response.data;
+  },
+
+  deleteRegistration: async (id: string) => {
+    const response = await api.delete(`/summer-camp/${id}`);
+    return response.data;
+  },
+
+  getStats: async () => {
+    const response = await api.get('/summer-camp/stats');
+    return response.data;
+  },
+  
+  downloadRegistrationsCSV: async (params?: {
+    status?: string;
+    search?: string;
+  }) => {
+    const response = await api.get('/summer-camp/download-csv', {
+      params,
+      responseType: 'blob'
+    });
     return response.data;
   },
 }
@@ -1323,4 +1393,4 @@ export const uploadApi = {
     return response.data
   }
 }
-
+
