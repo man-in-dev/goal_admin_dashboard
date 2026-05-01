@@ -74,32 +74,21 @@ export default function PdfUploadPage() {
       setUploading(true);
       setError(null);
       
-      // 1. Upload to DigitalOcean Spaces first
-      const uploadUrl = await uploadFileToSpaces(file);
+      // Upload file to backend server (saves to disk AND registers in PDF library)
+      const uploadUrl = await uploadFileToSpaces(file, docName);
       
       if (!uploadUrl) {
-        throw new Error('Failed to upload file to storage');
+        throw new Error('Failed to upload file. Please make sure the backend is running.');
       }
 
-      // 2. Register with server
-      const response = await uploadApi.uploadPdf({
-        name: docName,
-        url: uploadUrl,
-        filename: file.name,
-        size: file.size
-      });
-
-      if (response.success) {
-        setFile(null);
-        setDocName('');
-        setIsDialogOpen(false);
-        fetchPdfs(); // Refresh list
-      } else {
-        setError(response.message || 'Failed to register PDF on server');
-      }
+      // File is already registered in DB by the backend upload endpoint
+      setFile(null);
+      setDocName('');
+      setIsDialogOpen(false);
+      fetchPdfs(); // Refresh list
     } catch (err: any) {
       console.error('Upload error:', err);
-      setError(err.response?.data?.message || 'An error occurred during upload');
+      setError(err.response?.data?.message || err.message || 'An error occurred during upload');
     } finally {
       setUploading(false);
     }

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { neet2026AnswerKeyApi, Neet2026AnswerKey } from '@/lib/api';
+import { neet2026AnswerKeyApi, Neet2026AnswerKey, uploadApi } from '@/lib/api';
 import {
   Search,
   Eye,
@@ -22,8 +22,13 @@ import {
   CheckCircle2,
   XCircle,
   Video,
+  FileText,
+  X,
+  Upload,
+  Info,
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { uploadFileToSpaces } from '@/lib/storage';
 
 export default function Neet2026AnswerKeysPage() {
   const { toast } = useToast();
@@ -40,11 +45,17 @@ export default function Neet2026AnswerKeysPage() {
   const [viewingItem, setViewingItem] = useState<Neet2026AnswerKey | null>(null);
   const [formData, setFormData] = useState({
     subject: '',
+    pdfLink: '',
     videoLink: '',
     order: 0,
     isActive: true,
   });
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [masterKeyLoading, setMasterKeyLoading] = useState(false);
+  const [isMasterUploadOpen, setIsMasterUploadOpen] = useState(false);
+  const [masterUploadFile, setMasterUploadFile] = useState<File | null>(null);
+  const [masterUploadError, setMasterUploadError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   useEffect(() => {
@@ -91,6 +102,7 @@ export default function Neet2026AnswerKeysPage() {
   });
 
   const filteredKeys = sortedKeys.filter((item) => {
+    if (item.subject === 'NEET-2026 ANSWER KEY WITH QUESTION PAPER') return false;
     const term = searchTerm.toLowerCase();
     return (
       item.subject.toLowerCase().includes(term) ||
@@ -99,13 +111,43 @@ export default function Neet2026AnswerKeysPage() {
   });
 
   const resetForm = () => {
-    setFormData({ subject: '', videoLink: '', order: 0, isActive: true });
+    setFormData({ subject: '', pdfLink: '', videoLink: '', order: 0, isActive: true });
+    setPdfFile(null);
   };
 
   const handleCreate = async () => {
     try {
       setFormLoading(true);
-      const response = await neet2026AnswerKeyApi.createNeet2026AnswerKey(formData);
+      
+      let finalPdfLink = formData.pdfLink;
+      
+      if (pdfFile) {
+        const uploadedUrl = await uploadFileToSpaces(pdfFile);
+        if (uploadedUrl) {
+          finalPdfLink = uploadedUrl;
+          // Register with PDF repository as requested
+          try {
+            await uploadApi.uploadPdf({
+              name: `NEET 2026 Answer Key - ${formData.subject}`,
+              url: uploadedUrl,
+              filename: pdfFile.name,
+              size: pdfFile.size
+            });
+          } catch (err) {
+            console.error('Failed to register PDF in repository:', err);
+            // We continue as the link is still valid for this entry
+          }
+        } else {
+          toast({ title: 'Error', description: 'Failed to upload PDF', variant: 'destructive' });
+          return;
+        }
+      }
+
+      const response = await neet2026AnswerKeyApi.createNeet2026AnswerKey({
+        ...formData,
+        pdfLink: finalPdfLink
+      });
+      
       if (response.success) {
         toast({ title: 'Success', description: 'NEET 2026 Answer Key created successfully' });
         setIsCreateModalOpen(false);
@@ -125,10 +167,12 @@ export default function Neet2026AnswerKeysPage() {
     setEditingItem(item);
     setFormData({
       subject: item.subject,
+      pdfLink: item.pdfLink || '',
       videoLink: item.videoLink || '',
       order: item.order,
       isActive: item.isActive,
     });
+    setPdfFile(null);
     setIsEditModalOpen(true);
   };
 
@@ -136,7 +180,35 @@ export default function Neet2026AnswerKeysPage() {
     if (!editingItem) return;
     try {
       setFormLoading(true);
-      const response = await neet2026AnswerKeyApi.updateNeet2026AnswerKey(editingItem._id, formData);
+      
+      let finalPdfLink = formData.pdfLink;
+      
+      if (pdfFile) {
+        const uploadedUrl = await uploadFileToSpaces(pdfFile);
+        if (uploadedUrl) {
+          finalPdfLink = uploadedUrl;
+          // Register with PDF repository as requested
+          try {
+            await uploadApi.uploadPdf({
+              name: `NEET 2026 Answer Key - ${formData.subject}`,
+              url: uploadedUrl,
+              filename: pdfFile.name,
+              size: pdfFile.size
+            });
+          } catch (err) {
+            console.error('Failed to register PDF in repository:', err);
+          }
+        } else {
+          toast({ title: 'Error', description: 'Failed to upload PDF', variant: 'destructive' });
+          return;
+        }
+      }
+
+      const response = await neet2026AnswerKeyApi.updateNeet2026AnswerKey(editingItem._id, {
+        ...formData,
+        pdfLink: finalPdfLink
+      });
+      
       if (response.success) {
         toast({ title: 'Success', description: 'NEET 2026 Answer Key updated successfully' });
         setIsEditModalOpen(false);
@@ -178,6 +250,101 @@ export default function Neet2026AnswerKeysPage() {
     }
   };
 
+  const handleMasterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    if (selectedFile.type !== 'application/pdf') {
+      setMasterUploadError('Only PDF files are allowed');
+      setMasterUploadFile(null);
+      return;
+    }
+    if (selectedFile.size > 50 * 1024 * 1024) {
+      setMasterUploadError('File size exceeds 50MB limit');
+      setMasterUploadFile(null);
+      return;
+    }
+    setMasterUploadError(null);
+    setMasterUploadFile(selectedFile);
+  };
+
+  const handleMasterUploadConfirm = async () => {
+    if (!masterUploadFile) return;
+
+    try {
+      setMasterKeyLoading(true);
+      setMasterUploadError(null);
+
+      // Step 1: Upload file to backend server storage (also registers in PDF library)
+      const uploadedUrl = await uploadFileToSpaces(
+        masterUploadFile,
+        'NEET 2026 FULL ANSWER KEY & QUESTION PAPER'
+      );
+
+      if (!uploadedUrl) {
+        setMasterUploadError('Failed to upload file. Please make sure the backend server is running and try again.');
+        return;
+      }
+
+      // Step 2: Update or create the master answer key record
+      const masterSubject = 'NEET-2026 ANSWER KEY WITH QUESTION PAPER';
+      const existingMaster = keys.find((k) => k.subject === masterSubject);
+
+      if (existingMaster) {
+        await neet2026AnswerKeyApi.updateNeet2026AnswerKey(existingMaster._id, {
+          pdfLink: uploadedUrl,
+          isActive: true,
+        });
+      } else {
+        await neet2026AnswerKeyApi.createNeet2026AnswerKey({
+          subject: masterSubject,
+          pdfLink: uploadedUrl,
+          order: -1,
+          isActive: true,
+        });
+      }
+
+      toast({ title: 'Success', description: 'Master Answer Key uploaded and updated successfully!' });
+      setIsMasterUploadOpen(false);
+      setMasterUploadFile(null);
+      fetchKeys();
+    } catch (error: any) {
+      console.error('Master upload error:', error);
+      setMasterUploadError(error?.response?.data?.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      setMasterKeyLoading(false);
+    }
+  };
+
+  const handleDeleteMasterPdf = async () => {
+    const masterKey = keys.find(k => k.subject === "NEET-2026 ANSWER KEY WITH QUESTION PAPER");
+    if (!masterKey) return;
+    try {
+      setMasterKeyLoading(true);
+      const response = await neet2026AnswerKeyApi.deleteNeet2026AnswerKey(masterKey._id);
+      if (response.success) {
+        toast({ title: 'Success', description: 'Master PDF deleted successfully' });
+        fetchKeys();
+      } else {
+        toast({ title: 'Error', description: response.message || 'Failed to delete Master PDF', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to delete Master PDF', variant: 'destructive' });
+    } finally {
+      setMasterKeyLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (selectedFile.type !== 'application/pdf') {
+        toast({ title: 'Error', description: 'Only PDF files are allowed', variant: 'destructive' });
+        return;
+      }
+      setPdfFile(selectedFile);
+    }
+  };
+
   const handleView = (item: Neet2026AnswerKey) => {
     setViewingItem(item);
     setIsViewModalOpen(true);
@@ -193,10 +360,12 @@ export default function Neet2026AnswerKeysPage() {
   );
 
 
+  const masterKey = keys.find(k => k.subject === "NEET-2026 ANSWER KEY WITH QUESTION PAPER");
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto pb-10">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
             <Video className="w-8 h-8 text-blue-600" />
@@ -206,11 +375,147 @@ export default function Neet2026AnswerKeysPage() {
             Manage the NEET 2026 Answer Key table content
           </p>
         </div>
-        <Button onClick={() => { resetForm(); setIsCreateModalOpen(true); }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Answer Key
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={() => { resetForm(); setIsCreateModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 h-11 px-6 shadow-lg shadow-blue-100 font-bold transition-all active:scale-95">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Entry
+          </Button>
+        </div>
       </div>
+
+      {/* Current Master PDF Box */}
+      <Card className="border-blue-200 bg-blue-50/50 shadow-sm">
+        <CardContent className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 p-3 rounded-xl">
+              <FileText className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 text-lg">Master Question Paper & Answer Key</h3>
+              <p className="text-sm text-gray-600">
+                {masterKey?.pdfLink ? "This PDF is currently visible to students on the website." : "No master PDF uploaded yet. Students see 'Coming Soon'."}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <Dialog open={isMasterUploadOpen} onOpenChange={(open) => { setIsMasterUploadOpen(open); if (!open) { setMasterUploadFile(null); setMasterUploadError(null); } }}>
+              <Button
+                onClick={() => setIsMasterUploadOpen(true)}
+                disabled={masterKeyLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 px-4 rounded-lg shadow-sm"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {masterKey?.pdfLink ? 'Replace PDF' : 'Upload PDF'}
+              </Button>
+              <DialogContent className="sm:max-w-[500px] border-none shadow-2xl rounded-3xl overflow-hidden p-0">
+                <div className="bg-blue-600 p-8 text-white relative">
+                  <DialogHeader className="text-left">
+                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                      <Upload className="h-6 w-6" />
+                      Upload Master PDF
+                    </DialogTitle>
+                    <DialogDescription className="text-blue-100 mt-2 font-medium">
+                      Upload the official NEET 2026 question paper &amp; answer key. This will immediately activate the &quot;Download Now&quot; button on the student portal.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Upload className="absolute -bottom-4 -right-4 h-24 w-24 opacity-10 rotate-12" />
+                </div>
+                <div className="p-8 space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-gray-700">Master PDF File *</Label>
+                    {!masterUploadFile ? (
+                      <div
+                        className={`group border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all hover:bg-blue-50/50 hover:border-blue-400 ${masterUploadError ? 'border-red-200' : 'border-gray-200'}`}
+                        onClick={() => document.getElementById('master-pdf-file')?.click()}
+                      >
+                        <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                          <Upload className="h-6 w-6" />
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">Click to Select PDF</p>
+                        <p className="text-xs text-gray-500 mt-1">PDF only · Max 50MB</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-2xl">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-gray-900 truncate pr-4">{masterUploadFile.name}</p>
+                            <p className="text-[10px] text-gray-500">{(masterUploadFile.size / (1024 * 1024)).toFixed(2)} MB · PDF</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => setMasterUploadFile(null)} className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full">
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                    <input
+                      id="master-pdf-file"
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={handleMasterFileChange}
+                      disabled={masterKeyLoading}
+                    />
+                  </div>
+                  {masterUploadError && (
+                    <div className="p-3 bg-red-50 text-red-700 text-[11px] font-bold rounded-xl border border-red-100 flex items-center gap-2">
+                      <div className="w-1 h-1 rounded-full bg-red-600 flex-shrink-0" />
+                      {masterUploadError}
+                    </div>
+                  )}
+                </div>
+                <DialogFooter className="p-8 pt-0 flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="h-12 px-6 rounded-xl border-gray-200 font-bold text-gray-600"
+                    onClick={() => { setIsMasterUploadOpen(false); setMasterUploadFile(null); setMasterUploadError(null); }}
+                    disabled={masterKeyLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-lg shadow-blue-100 transition-all active:scale-[0.98]"
+                    onClick={handleMasterUploadConfirm}
+                    disabled={!masterUploadFile || masterKeyLoading}
+                  >
+                    {masterKeyLoading ? (
+                      <><Loader2 className="h-5 w-5 animate-spin mr-2" />Uploading...</>
+                    ) : (
+                      'Confirm & Upload'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {masterKey?.pdfLink && (
+              <>
+                <a
+                  href={masterKey.pdfLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-bold text-sm shadow-sm"
+                >
+                  <Eye className="h-4 w-4" />
+                  View
+                </a>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteMasterPdf}
+                  disabled={masterKeyLoading}
+                  className="h-10 px-4 font-bold shadow-sm"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Search */}
       <Card>
@@ -293,13 +598,13 @@ export default function Neet2026AnswerKeysPage() {
                             href={item.videoLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-600 hover:text-green-800 flex items-center gap-1 font-medium"
+                            className="text-green-600 hover:text-green-800 flex items-center gap-1 font-medium text-xs"
                           >
-                            <ExternalLink className="h-4 w-4" />
-                            Click Here
+                            <ExternalLink className="h-3 w-3" />
+                            Watch Video
                           </a>
                         ) : (
-                          <span className="text-gray-400 text-sm">No link</span>
+                          <span className="text-gray-400 text-[10px]">No Video link</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -503,21 +808,23 @@ export default function Neet2026AnswerKeysPage() {
                   </div>
                 </div>
               </div>
-              <div>
-                <Label className="text-xs text-gray-500 uppercase tracking-wide">Video Solution Link</Label>
-                {viewingItem.videoLink ? (
-                  <a
-                    href={viewingItem.videoLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm mt-1 break-all"
-                  >
-                    <ExternalLink className="h-4 w-4 flex-shrink-0" />
-                    {viewingItem.videoLink}
-                  </a>
-                ) : (
-                  <p className="text-sm text-gray-400 mt-1">No link provided</p>
-                )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs text-gray-500 uppercase tracking-wide">Video Solution Link</Label>
+                  {viewingItem.videoLink ? (
+                    <a
+                      href={viewingItem.videoLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm mt-1 break-all"
+                    >
+                      <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                      Video Link
+                    </a>
+                  ) : (
+                    <p className="text-sm text-gray-400 mt-1">No video link</p>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                 <div>
