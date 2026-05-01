@@ -58,6 +58,7 @@ export default function BannerManagementPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [createPosition, setCreatePosition] = useState<'hero' | 'sidebar' | 'footer' | 'popup'>('hero');
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -281,10 +282,16 @@ export default function BannerManagementPage() {
           <h1 className="text-3xl font-bold text-gray-900">Banner Management</h1>
           <p className="text-gray-600">Manage website banners and advertisements</p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Banner
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50" onClick={() => { setCreatePosition('popup'); setIsCreateDialogOpen(true); }}>
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Popup
+          </Button>
+          <Button onClick={() => { setCreatePosition('hero'); setIsCreateDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Banner
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -604,12 +611,13 @@ export default function BannerManagementPage() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create New Banner</DialogTitle>
+            <DialogTitle>{createPosition === 'popup' ? 'Upload Popup Banner' : 'Create New Banner'}</DialogTitle>
             <DialogDescription>
-              Create a new banner for the website
+              {createPosition === 'popup' ? 'Upload an image for the website popup.' : 'Create a new banner for the website'}
             </DialogDescription>
           </DialogHeader>
           <CreateBannerForm
+            initialPosition={createPosition}
             onSave={handleCreateBanner}
             onCancel={() => setIsCreateDialogOpen(false)}
           />
@@ -644,6 +652,8 @@ function EditBannerForm({
     createdBy: banner.createdBy
   });
 
+  const isPopup = banner.position === 'popup';
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -651,43 +661,47 @@ function EditBannerForm({
 
   return (
     <form onSubmit={handleSubmit} className="h-[70vh] overflow-y-auto space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            value={formData.title}
-            onChange={(e) => setFormData({...formData, title: e.target.value})}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="position">Position</Label>
-          <Select value={formData.position} onValueChange={(value) => setFormData({...formData, position: value as any})}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="hero">Hero</SelectItem>
-              <SelectItem value="sidebar">Sidebar</SelectItem>
-              <SelectItem value="footer">Footer</SelectItem>
-              <SelectItem value="popup">Popup</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-          rows={2}
-        />
-      </div>
+      {!isPopup && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                required={!isPopup}
+              />
+            </div>
+            <div>
+              <Label htmlFor="position">Position</Label>
+              <Select value={formData.position} onValueChange={(value) => setFormData({...formData, position: value as any})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hero">Hero</SelectItem>
+                  <SelectItem value="sidebar">Sidebar</SelectItem>
+                  <SelectItem value="footer">Footer</SelectItem>
+                  <SelectItem value="popup">Popup</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={2}
+            />
+          </div>
+        </>
+      )}
       <div className="space-y-4">
         <div>
-          <h4 className="text-sm font-medium mb-2">Desktop Image</h4>
+          <h4 className="text-sm font-medium mb-2">{isPopup ? 'Popup Image' : 'Desktop Image'}</h4>
           <ImageUpload
             value={formData.imageUrl}
             onChange={(value) => {
@@ -697,7 +711,7 @@ function EditBannerForm({
               setFormData(prev => ({...prev, imageAlt: alt}));
             }}
             altValue={formData.imageAlt}
-            label="Desktop Banner Image"
+            label={isPopup ? 'Popup Image' : 'Desktop Banner Image'}
             required
             maxSize={10}
             acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
@@ -705,23 +719,25 @@ function EditBannerForm({
           />
         </div>
         
-        <div>
-          <h4 className="text-sm font-medium mb-2">Mobile Image (Optional)</h4>
-          <ImageUpload
-            value={formData.mobileImageUrl}
-            onChange={(value) => {
-              setFormData(prev => ({...prev, mobileImageUrl: value}));
-            }}
-            onAltChange={(alt) => {
-              setFormData(prev => ({...prev, mobileImageAlt: alt}));
-            }}
-            altValue={formData.mobileImageAlt}
-            label="Mobile Banner Image"
-            maxSize={10}
-            acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
-            preview={true}
-          />
-        </div>
+        {!isPopup && (
+          <div>
+            <h4 className="text-sm font-medium mb-2">Mobile Image (Optional)</h4>
+            <ImageUpload
+              value={formData.mobileImageUrl}
+              onChange={(value) => {
+                setFormData(prev => ({...prev, mobileImageUrl: value}));
+              }}
+              onAltChange={(alt) => {
+                setFormData(prev => ({...prev, mobileImageAlt: alt}));
+              }}
+              altValue={formData.mobileImageAlt}
+              label="Mobile Banner Image"
+              maxSize={10}
+              acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
+              preview={true}
+            />
+          </div>
+        )}
       </div>
       
       <div>
@@ -732,6 +748,7 @@ function EditBannerForm({
           onChange={(e) => setFormData({...formData, linkUrl: e.target.value})}
         />
       </div>
+      {!isPopup && (
         <div>
           <Label htmlFor="priority">Priority (0-100)</Label>
           <Input
@@ -743,6 +760,7 @@ function EditBannerForm({
             onChange={(e) => setFormData({...formData, priority: parseInt(e.target.value)})}
           />
         </div>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center space-x-2">
           <Switch
@@ -758,7 +776,7 @@ function EditBannerForm({
           Cancel
         </Button>
         <Button type="submit">
-          Save Changes
+          {isPopup ? 'Save Popup' : 'Save Changes'}
         </Button>
       </div>
     </form>
@@ -768,10 +786,12 @@ function EditBannerForm({
 // Create Banner Form Component
 function CreateBannerForm({ 
   onSave, 
-  onCancel 
+  onCancel,
+  initialPosition = 'hero'
 }: { 
   onSave: (data: Omit<Banner, '_id' | 'createdAt' | 'updatedAt' | 'clicks' | 'impressions'>) => void; 
   onCancel: () => void; 
+  initialPosition?: 'hero' | 'sidebar' | 'footer' | 'popup';
 }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -781,57 +801,66 @@ function CreateBannerForm({
     mobileImageUrl: '',
     mobileImageAlt: '',
     linkUrl: '',
-    position: 'hero' as const,
+    position: initialPosition,
     isActive: true,
     priority: 50,
     targetAudience: [] as string[],
     createdBy: 'Admin'
   });
 
+  const isPopup = initialPosition === 'popup';
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({
+      ...formData,
+      title: isPopup && !formData.title ? `Popup Banner ${new Date().toLocaleDateString()}` : formData.title,
+    });
   };
 
   return (
     <form onSubmit={handleSubmit} className="h-[70vh] overflow-y-auto space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            value={formData.title}
-            onChange={(e) => setFormData({...formData, title: e.target.value})}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="position">Position</Label>
-          <Select value={formData.position} onValueChange={(value) => setFormData({...formData, position: value as any})}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="hero">Hero</SelectItem>
-              <SelectItem value="sidebar">Sidebar</SelectItem>
-              <SelectItem value="footer">Footer</SelectItem>
-              <SelectItem value="popup">Popup</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
-          rows={2}
-        />
-      </div>
+      {!isPopup && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                required={!isPopup}
+              />
+            </div>
+            <div>
+              <Label htmlFor="position">Position</Label>
+              <Select value={formData.position} onValueChange={(value) => setFormData({...formData, position: value as any})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hero">Hero</SelectItem>
+                  <SelectItem value="sidebar">Sidebar</SelectItem>
+                  <SelectItem value="footer">Footer</SelectItem>
+                  <SelectItem value="popup">Popup</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={2}
+            />
+          </div>
+        </>
+      )}
       <div className="space-y-4">
         <div>
-          <h4 className="text-sm font-medium mb-2">Desktop Image</h4>
+          <h4 className="text-sm font-medium mb-2">{isPopup ? 'Popup Image' : 'Desktop Image'}</h4>
           <ImageUpload
             value={formData.imageUrl}
             onChange={(value) => {
@@ -841,7 +870,7 @@ function CreateBannerForm({
               setFormData(prev => ({...prev, imageAlt: alt}));
             }}
             altValue={formData.imageAlt}
-            label="Desktop Banner Image"
+            label={isPopup ? 'Popup Image' : 'Desktop Banner Image'}
             required
             maxSize={10}
             acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
@@ -849,23 +878,25 @@ function CreateBannerForm({
           />
         </div>
         
-        <div>
-          <h4 className="text-sm font-medium mb-2">Mobile Image (Optional)</h4>
-          <ImageUpload
-            value={formData.mobileImageUrl}
-            onChange={(value) => {
-              setFormData(prev => ({...prev, mobileImageUrl: value}));
-            }}
-            onAltChange={(alt) => {
-              setFormData(prev => ({...prev, mobileImageAlt: alt}));
-            }}
-            altValue={formData.mobileImageAlt}
-            label="Mobile Banner Image"
-            maxSize={10}
-            acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
-            preview={true}
-          />
-        </div>
+        {!isPopup && (
+          <div>
+            <h4 className="text-sm font-medium mb-2">Mobile Image (Optional)</h4>
+            <ImageUpload
+              value={formData.mobileImageUrl}
+              onChange={(value) => {
+                setFormData(prev => ({...prev, mobileImageUrl: value}));
+              }}
+              onAltChange={(alt) => {
+                setFormData(prev => ({...prev, mobileImageAlt: alt}));
+              }}
+              altValue={formData.mobileImageAlt}
+              label="Mobile Banner Image"
+              maxSize={10}
+              acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']}
+              preview={true}
+            />
+          </div>
+        )}
       </div>
       
       <div>
@@ -876,6 +907,7 @@ function CreateBannerForm({
           onChange={(e) => setFormData({...formData, linkUrl: e.target.value})}
         />
       </div>
+      {!isPopup && (
         <div>
           <Label htmlFor="priority">Priority (0-100)</Label>
           <Input
@@ -887,6 +919,7 @@ function CreateBannerForm({
             onChange={(e) => setFormData({...formData, priority: parseInt(e.target.value)})}
           />
         </div>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center space-x-2">
           <Switch
@@ -902,7 +935,7 @@ function CreateBannerForm({
           Cancel
         </Button>
         <Button type="submit">
-          Create Banner
+          {isPopup ? 'Upload Popup' : 'Create Banner'}
         </Button>
       </div>
     </form>

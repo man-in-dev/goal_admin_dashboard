@@ -11,7 +11,7 @@ import s3Client from "./s3";
 export async function getSignedUploadUrl(
   fileName: string,
   fileType: string
-): Promise<{ uploadUrl: string; key: string } | null> {
+): Promise<{ uploadUrl: string; key: string; publicUrlBase: string } | null> {
   try {
     const bucket = process.env.DO_SPACES_BUCKET;
     if (!bucket) throw new Error("DO_SPACES_BUCKET is not defined");
@@ -33,7 +33,11 @@ export async function getSignedUploadUrl(
     // The S3 client uses the credentials from environment variables on the server
     const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     
-    return { uploadUrl, key };
+    // Construct the public URL base
+    const publicEndpoint = process.env.NEXT_PUBLIC_DO_SPACES_ENDPOINT || 
+      `https://${bucket}.${process.env.DO_SPACES_REGION || 'sfo3'}.digitaloceanspaces.com`;
+
+    return { uploadUrl, key, publicUrlBase: publicEndpoint };
   } catch (error) {
     console.error("Error generating signed URL:", error);
     return null;

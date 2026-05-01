@@ -1041,6 +1041,7 @@ export interface SpotTestVideoSolution {
 export interface Neet2026AnswerKey {
   _id: string;
   subject: string;
+  pdfLink?: string;
   videoLink?: string;
   order: number;
   isActive: boolean;
@@ -1374,6 +1375,18 @@ export const chatApi = {
 
 // Upload API
 export const uploadApi = {
+  // Upload actual PDF file to backend server storage
+  uploadFile: async (file: File, name: string): Promise<{ success: boolean; data?: { url: string; pdf: any }; message?: string }> => {
+    const formData = new FormData();
+    formData.append('pdf', file);
+    formData.append('name', name);
+    const response = await api.post('/upload/file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  // Register PDF metadata only (when URL comes from external storage)
   uploadPdf: async (data: { name: string; url: string; filename: string; size: number }) => {
     const response = await api.post('/upload/pdf', data)
     return response.data
