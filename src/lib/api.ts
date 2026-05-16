@@ -1083,6 +1083,52 @@ export const spotTestVideoSolutionApi = {
   },
 }
 
+// RE-NEET Video Solution API
+export interface ReNeetVideoSolution {
+  _id: string;
+  testName: string;
+  subject: string;
+  videoLink?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const reNeetVideoSolutionApi = {
+  getReNeetVideoSolutions: async (params?: {
+    activeOnly?: boolean;
+  }) => {
+    const response = await api.get('/re-neet-video-solutions', { params })
+    return response.data
+  },
+
+  getReNeetVideoSolutionById: async (id: string) => {
+    const response = await api.get(`/re-neet-video-solutions/${id}`)
+    return response.data
+  },
+
+  createReNeetVideoSolution: async (data: Partial<ReNeetVideoSolution>) => {
+    const response = await api.post('/re-neet-video-solutions', data)
+    return response.data
+  },
+
+  updateReNeetVideoSolution: async (id: string, data: Partial<ReNeetVideoSolution>) => {
+    const response = await api.put(`/re-neet-video-solutions/${id}`, data)
+    return response.data
+  },
+
+  deleteReNeetVideoSolution: async (id: string) => {
+    const response = await api.delete(`/re-neet-video-solutions/${id}`)
+    return response.data
+  },
+
+  bulkDeleteReNeetVideoSolutions: async (ids: string[]) => {
+    const response = await api.delete('/re-neet-video-solutions', { data: { ids } })
+    return response.data
+  },
+}
+
 export const neet2026AnswerKeyApi = {
   getNeet2026AnswerKeys: async (params?: {
     activeOnly?: boolean;
