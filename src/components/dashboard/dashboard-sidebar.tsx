@@ -54,6 +54,8 @@ const navigation: NavigationItem[] = [
     icon: Upload,
     children: [
       { name: "Banner Management", href: "/dashboard/banners", icon: Upload },
+      { name: "Page Images", href: "/dashboard/page-images", icon: Upload },
+      // { name: "Page Settings", href: "/dashboard/page-settings", icon: Settings },
       { name: "Blogs", href: "/dashboard/blogs", icon: BookOpen },
       { name: "PDF Upload", href: "/dashboard/pdf-upload", icon: FileText },
     ]
