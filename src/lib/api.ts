@@ -1453,3 +1453,68 @@ export const uploadApi = {
   }
 }
 
+// Page Image API
+export interface PageImage {
+  _id: string;
+  page: string;
+  imageUrl: string;
+  imageAlt?: string;
+  isActive: boolean;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const pageImageApi = {
+  getPageImages: async (params?: { page?: string; isActive?: boolean }) => {
+    const response = await api.get('/page-images', { params })
+    return response.data
+  },
+  
+  getActiveImagesByPage: async (page: string) => {
+    const response = await api.get(`/page-images/active/${page}`)
+    return response.data
+  },
+
+  createPageImage: async (data: Partial<PageImage>) => {
+    const response = await api.post('/page-images', data)
+    return response.data
+  },
+
+  updatePageImage: async (id: string, data: Partial<PageImage>) => {
+    const response = await api.put(`/page-images/${id}`, data)
+    return response.data
+  },
+
+  deletePageImage: async (id: string) => {
+    const response = await api.delete(`/page-images/${id}`)
+    return response.data
+  },
+
+  togglePageImageStatus: async (id: string) => {
+    const response = await api.patch(`/page-images/${id}/toggle-status`)
+    return response.data
+  }
+}
+
+// Page Setting API
+export interface PageSetting {
+  _id: string;
+  page: string;
+  key: string;
+  value: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const pageSettingApi = {
+  getSettingsByPage: async (page: string) => {
+    const response = await api.get(`/page-settings/${page}`)
+    return response.data
+  },
+
+  updateSetting: async (page: string, key: string, value: string) => {
+    const response = await api.put(`/page-settings/${page}/${key}`, { value })
+    return response.data
+  }
+}
