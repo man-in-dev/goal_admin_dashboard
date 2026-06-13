@@ -87,6 +87,21 @@ export interface EnquiryForm {
   updatedAt: string
 }
 
+export interface CareerCounselling {
+  _id: string
+  studentName: string
+  mobileNo: string
+  class: string
+  city: string
+  institute: string
+  examPreparation: 'NEET' | 'JEE' | 'NEET & JEE' | 'Other'
+  status: 'pending' | 'contacted' | 'counselled' | 'closed'
+  notes?: string
+  source?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface ComplaintFeedback {
   _id: string
   isGoalStudent: boolean
@@ -242,6 +257,48 @@ export const formApi = {
     search?: string
   }) => {
     const response = await api.get('/complaint-feedback/download-csv', {
+      params,
+      responseType: 'blob'
+    })
+    return response.data
+  },
+
+  // Career Counselling Requests
+  getCareerCounsellings: async (params?: {
+    page?: number
+    limit?: number
+    status?: string
+    search?: string
+  }) => {
+    const response = await api.get('/career-counselling', { params })
+    return response.data
+  },
+
+  getCareerCounsellingById: async (id: string) => {
+    const response = await api.get(`/career-counselling/${id}`)
+    return response.data
+  },
+
+  updateCareerCounselling: async (id: string, data: Partial<CareerCounselling>) => {
+    const response = await api.put(`/career-counselling/${id}`, data)
+    return response.data
+  },
+
+  deleteCareerCounselling: async (id: string) => {
+    const response = await api.delete(`/career-counselling/${id}`)
+    return response.data
+  },
+
+  getCareerCounsellingStats: async () => {
+    const response = await api.get('/career-counselling/stats')
+    return response.data
+  },
+
+  downloadCareerCounsellingCSV: async (params?: {
+    status?: string
+    search?: string
+  }) => {
+    const response = await api.get('/career-counselling/download-csv', {
       params,
       responseType: 'blob'
     })
