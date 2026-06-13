@@ -93,6 +93,7 @@ const navigation: NavigationItem[] = [
     ]
   },
   { name: "Enquiry Forms", href: "/dashboard/enquiry", icon: HelpCircle },
+  { name: "Career Counselling", href: "/dashboard/career-counselling", icon: Users },
   { name: "Admission Forms", href: "/dashboard/admission-forms", icon: GraduationCap },
   { name: "Summer Camp 2026", href: "/dashboard/summer-camp", icon: Calendar },
   { name: "Chatbot Insights", href: "/dashboard/chatbot-insights", icon: MessageSquare },
